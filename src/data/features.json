@@ -1,0 +1,38 @@
+
+{
+  "heading": "Comprehensive Career Tools",
+  "subheading": "Everything you need to stand out in today's competitive job market, powered by advanced AI technology.",
+  "features": [
+    {
+      "name": "✅ Get Started — Input Your Background",
+      "description": "Upload your résumé, import your LinkedIn, or answer guided questions.",
+      "bullets": [
+        "Smart résumé parser",
+        "AI résumé generator from scratch",
+        "LinkedIn profile importer"
+      ],
+      "cta": "Create My Résumé",
+      "icon": "FileText"
+    },
+    {
+      "name": "🛠️ Refine & Polish — Build Your Brand",
+      "description": "Auto-generate high-conversion, professional assets.",
+      "bullets": [
+        "AI Cover Letter Maker → Tailored letters using job links and tone presets",
+        "AI Portfolio Builder → Pick a theme, edit content, and publish instantly"
+      ],
+      "cta": "Generate Cover Letter",
+      "icon": "User"
+    },
+    {
+      "name": "🚀 Get Job-Ready — Go Proactively",
+      "description": "Practice, apply, and grow with coaching + job search tools.",
+      "bullets": [
+        "AI Career Coach → Skill gap analysis + learning path",
+        "Job Search Engine → Curated roles + Apply-with-Profile shortcut"
+      ],
+      "cta": "Start Coaching",
+      "icon": "Search"
+    }
+  ]
+}

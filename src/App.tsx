@@ -19,6 +19,8 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/upload-resume" element={<ResumeUpload />} />
+          <Route path="/signup" element={<ResumeUpload />} />
+          <Route path="/demo" element={<ResumeUpload />} /> {/* Placeholder: Will need a demo page */}
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

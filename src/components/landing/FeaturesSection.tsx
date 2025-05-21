@@ -1,74 +1,65 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, User, Book, Calendar, Mail, Mic, Search, Award, Link } from "lucide-react";
+import { FileText, User, Book, Calendar, Mail, Mic, Search, Award, Link as LinkIcon } from "lucide-react";
+import { getFeaturesData, Feature } from "@/lib/dataUtils";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
-const features = [
-  {
-    icon: <FileText className="h-8 w-8 text-portfolioai-accent" />,
-    title: "AI Resume Optimization",
-    description: "Transform your resume to be ATS-friendly and highlight your most relevant skills and experiences."
-  },
-  {
-    icon: <User className="h-8 w-8 text-portfolioai-accent" />,
-    title: "Portfolio Generator",
-    description: "Create a professional portfolio website tailored to your career goals and accomplishments."
-  },
-  {
-    icon: <Mail className="h-8 w-8 text-portfolioai-accent" />,
-    title: "Cover Letter Creator",
-    description: "Generate personalized cover letters that match job descriptions and highlight your qualifications."
-  },
-  {
-    icon: <Mic className="h-8 w-8 text-portfolioai-accent" />,
-    title: "AI Mock Interviews",
-    description: "Practice interviews with our AI interviewer and receive instant feedback to improve your performance."
-  },
-  {
-    icon: <Search className="h-8 w-8 text-portfolioai-accent" />,
-    title: "Job Match Analysis",
-    description: "Get AI-powered insights on how well your profile matches specific job descriptions."
-  },
-  {
-    icon: <Award className="h-8 w-8 text-portfolioai-accent" />,
-    title: "Skills Assessment",
-    description: "Identify your strengths and areas for improvement with our comprehensive skills analysis."
-  },
-  {
-    icon: <Calendar className="h-8 w-8 text-portfolioai-accent" />,
-    title: "Interview Scheduler",
-    description: "Schedule and prepare for upcoming interviews with personalized preparation plans."
-  },
-  {
-    icon: <Link className="h-8 w-8 text-portfolioai-accent" />,
-    title: "LinkedIn Optimization",
-    description: "Enhance your LinkedIn profile to attract recruiters and improve your visibility."
-  },
-];
+// Icon mapping
+const iconMap: Record<string, React.ReactNode> = {
+  FileText: <FileText className="h-8 w-8 text-portfolioai-accent" />,
+  User: <User className="h-8 w-8 text-portfolioai-accent" />,
+  Search: <Search className="h-8 w-8 text-portfolioai-accent" />,
+  Calendar: <Calendar className="h-8 w-8 text-portfolioai-accent" />,
+  Mail: <Mail className="h-8 w-8 text-portfolioai-accent" />,
+  Mic: <Mic className="h-8 w-8 text-portfolioai-accent" />,
+  Award: <Award className="h-8 w-8 text-portfolioai-accent" />,
+  Link: <LinkIcon className="h-8 w-8 text-portfolioai-accent" />
+};
+
+const FeatureCard = ({ feature }: { feature: Feature }) => {
+  return (
+    <Card className="border border-gray-200 transition-all hover:shadow-md h-full flex flex-col">
+      <CardHeader>
+        <div className="mb-2">{iconMap[feature.icon] || <FileText className="h-8 w-8 text-portfolioai-accent" />}</div>
+        <CardTitle className="text-xl font-semibold text-portfolioai-primary">{feature.name}</CardTitle>
+      </CardHeader>
+      <CardContent className="flex-grow">
+        <CardDescription className="text-gray-600 mb-4">{feature.description}</CardDescription>
+        <ul className="space-y-2 mb-6">
+          {feature.bullets.map((bullet, idx) => (
+            <li key={idx} className="flex items-start">
+              <span className="text-portfolioai-accent mr-2">•</span>
+              <span className="text-sm text-gray-700">{bullet}</span>
+            </li>
+          ))}
+        </ul>
+        <Button className="w-full mt-auto" asChild>
+          <Link to="/upload-resume">{feature.cta}</Link>
+        </Button>
+      </CardContent>
+    </Card>
+  );
+};
 
 const FeaturesSection = () => {
+  const { heading, subheading, features } = getFeaturesData();
+
   return (
     <section className="py-16 bg-gray-50" id="features">
       <div className="container-wide">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold text-portfolioai-primary">
-            Comprehensive Career Tools
+            {heading}
           </h2>
           <p className="mt-4 text-lg text-gray-600">
-            Everything you need to stand out in today's competitive job market, powered by advanced AI technology.
+            {subheading}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {features.map((feature, index) => (
-            <Card key={index} className="border border-gray-200 transition-all hover:shadow-md">
-              <CardHeader>
-                <div className="mb-2">{feature.icon}</div>
-                <CardTitle className="text-xl font-semibold text-portfolioai-primary">{feature.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-gray-600">{feature.description}</CardDescription>
-              </CardContent>
-            </Card>
+            <FeatureCard key={index} feature={feature} />
           ))}
         </div>
       </div>

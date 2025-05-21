@@ -1,40 +1,19 @@
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-
-const testimonials = [
-  {
-    name: "Sarah Johnson",
-    position: "Frontend Developer",
-    company: "Tech Innovate",
-    image: "https://randomuser.me/api/portraits/women/44.jpg",
-    quote: "PortfolioAI transformed my basic resume into a comprehensive portfolio that helped me stand out. I received interview calls from 3 top companies within a week!"
-  },
-  {
-    name: "Michael Chen",
-    position: "Software Engineer",
-    company: "DataSphere",
-    image: "https://randomuser.me/api/portraits/men/32.jpg",
-    quote: "The AI mock interviews were incredibly realistic and helped me prepare for tough technical questions. I'm now working at my dream company thanks to PortfolioAI."
-  },
-  {
-    name: "Jessica Williams",
-    position: "UX Designer",
-    company: "Creative Solutions",
-    image: "https://randomuser.me/api/portraits/women/68.jpg",
-    quote: "I was skeptical about AI-written cover letters, but PortfolioAI created personalized letters that perfectly highlighted my experience for each job application."
-  },
-];
+import { getTestimonialsData } from "@/lib/dataUtils";
 
 const TestimonialsSection = () => {
+  const { heading, subheading, testimonials } = getTestimonialsData();
+
   return (
     <section className="py-16 bg-gray-50" id="testimonials">
       <div className="container-wide">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold text-portfolioai-primary">
-            Success Stories
+            {heading}
           </h2>
           <p className="mt-4 text-lg text-gray-600">
-            See how PortfolioAI has helped early-career professionals land their dream jobs
+            {subheading}
           </p>
         </div>
 

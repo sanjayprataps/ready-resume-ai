@@ -1,44 +1,20 @@
 
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-
-const steps = [
-  {
-    number: "01",
-    title: "Upload your resume or LinkedIn profile",
-    description: "Start by uploading your existing resume or connecting your LinkedIn profile to extract your professional information.",
-    image: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80"
-  },
-  {
-    number: "02",
-    title: "Choose what you want to create",
-    description: "Select from portfolio website, optimized resume, cover letter, or prepare for interviews with our AI tools.",
-    image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80"
-  },
-  {
-    number: "03",
-    title: "Customize and refine with AI assistance",
-    description: "Fine-tune your content with our AI assistant that helps highlight your strengths and matches job requirements.",
-    image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80"
-  },
-  {
-    number: "04",
-    title: "Download, publish, or share your results",
-    description: "Export your optimized materials in various formats or publish your portfolio site with a custom domain.",
-    image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80"
-  }
-];
+import { getHowItWorksData } from "@/lib/dataUtils";
 
 const HowItWorksSection = () => {
+  const { heading, subheading, steps } = getHowItWorksData();
+
   return (
     <section className="py-16 bg-white" id="how-it-works">
       <div className="container-wide">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold text-portfolioai-primary">
-            How PortfolioAI Works
+            {heading}
           </h2>
           <p className="mt-4 text-lg text-gray-600">
-            Four simple steps to transform your career materials with the power of AI
+            {subheading}
           </p>
         </div>
 
