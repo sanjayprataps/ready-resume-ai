@@ -9,13 +9,21 @@ const Navbar = () => {
 
   return (
     <nav className="bg-white shadow-sm py-4 fixed w-full top-0 z-50">
-      <div className="container-wide flex justify-center items-center">
+      <div className="container-wide flex justify-between items-center">
+        <div className="flex-1"></div>
+        
         <div className="flex items-center">
           <Link to="/" className="flex items-center">
             <span className="font-display text-portfolioai-primary text-2xl font-bold">
               Portfolio<span className="text-portfolioai-accent">AI</span>
             </span>
           </Link>
+        </div>
+        
+        <div className="flex-1 flex justify-end">
+          <Button variant="ghost" asChild>
+            <Link to="/login">Login</Link>
+          </Button>
         </div>
       </div>
     </nav>
