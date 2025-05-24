@@ -88,8 +88,8 @@ const FeatureCard = ({ feature }: { feature: any }) => {
         <div className="mb-3">{iconMap[feature.icon] || <FileText className="h-6 w-6 text-portfolioai-accent" />}</div>
         <CardTitle className="text-lg font-semibold text-portfolioai-primary">{feature.name}</CardTitle>
       </CardHeader>
-      <CardContent className="flex-grow pt-0">
-        <CardDescription className="text-gray-600 mb-4 text-sm">{feature.description}</CardDescription>
+      <CardContent className="flex-grow flex flex-col pt-0">
+        <CardDescription className="text-gray-600 mb-4 text-sm flex-grow">{feature.description}</CardDescription>
         <Button className="w-full mt-auto" size="sm" asChild>
           <Link to="/upload-resume">{feature.cta}</Link>
         </Button>
