@@ -12,7 +12,7 @@ const HeroSection = () => {
       <div className="container-wide py-16 md:py-24">
         <div className="text-center max-w-4xl mx-auto">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight hero-text-gradient">
-            <span className="block text-5xl">{product_name}</span>
+            
             <span className="block">{tagline}</span>
           </h1>
           <p className="mt-6 text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
