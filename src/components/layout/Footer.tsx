@@ -1,7 +1,10 @@
+
 import { Link } from "react-router-dom";
 import { Mail, Calendar, MessageSquare } from "lucide-react";
+
 const Footer = () => {
-  return <footer className="bg-gray-50 border-t border-gray-200 pt-12 pb-8">
+  return (
+    <footer className="bg-gray-50 border-t border-gray-200 pt-12 pb-8">
       <div className="container-wide">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
@@ -57,7 +60,7 @@ const Footer = () => {
             </ul>
           </div>
           <div>
-            <h3 className="text-lg font-medium text-gray-900">Information</h3>
+            <h3 className="text-lg font-medium text-gray-900">Company</h3>
             <ul className="mt-4 space-y-3">
               <li>
                 <Link to="/about" className="text-gray-600 hover:text-portfolioai-secondary transition-colors">
@@ -65,7 +68,9 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                
+                <Link to="/blog" className="text-gray-600 hover:text-portfolioai-secondary transition-colors">
+                  Blog
+                </Link>
               </li>
               <li>
                 <Link to="/privacy" className="text-gray-600 hover:text-portfolioai-secondary transition-colors">
@@ -89,7 +94,10 @@ const Footer = () => {
               <Mail className="h-4 w-4 mr-2" />
               Contact Us
             </a>
-            
+            <a href="#" className="text-gray-500 hover:text-gray-600 flex items-center text-sm">
+              <Calendar className="h-4 w-4 mr-2" />
+              Book Demo
+            </a>
             <a href="#" className="text-gray-500 hover:text-gray-600 flex items-center text-sm">
               <MessageSquare className="h-4 w-4 mr-2" />
               Support
@@ -97,6 +105,8 @@ const Footer = () => {
           </div>
         </div>
       </div>
-    </footer>;
+    </footer>
+  );
 };
+
 export default Footer;
