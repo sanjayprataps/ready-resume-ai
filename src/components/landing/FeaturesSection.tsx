@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, User, Book, Calendar, Mail, Mic, Search, Award, Link as LinkIcon } from "lucide-react";
+import { FileText, User, Book, Calendar, Mail, Mic, Search, Award, Link as LinkIcon, BrainCircuit, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -14,57 +14,66 @@ const featuresData = {
       name: "AI Resume Optimizer",
       description: "Real-time score, keyword gap analysis vs. target job description, and auto-rewrite suggestions.",
       icon: "Search",
-      cta: "Optimize Now"
+      cta: "Optimize Now",
+      route: "/resume-optimizer"
     },
     {
       name: "AI Resume Generator", 
       description: "Don't have a Resume or CV?, No problem! Import your LinkedIn profile to generate a resume OR Generate a resume by answering guided questions.",
       icon: "FileText",
-      cta: "Generate Resume"
+      cta: "Generate Resume",
+      route: "/resume-generator"
     },
     {
       name: "AI Cover Letter Writer",
       description: "Get job-specific cover letters using job description and your resume data.",
       icon: "Mail",
-      cta: "Write Cover Letter"
+      cta: "Write Cover Letter",
+      route: "/cover-letter-writer"
     },
-    // Row 2 - Placeholder content
+    // Row 2
     {
-      name: "Portfolio Builder",
-      description: "Create stunning portfolios that showcase your work and achievements.",
+      name: "AI Portfolio Builder",
+      description: "Accepts PDF/Word résumé or guided Q&A to generate a responsive, host-ready site (custom subdomain + exportable HTML)",
       icon: "User",
-      cta: "Build Portfolio"
+      cta: "Build Portfolio",
+      route: "/portfolio-builder"
     },
     {
-      name: "Interview Coach",
-      description: "Practice interviews with AI-powered coaching and feedback.",
-      icon: "Mic",
-      cta: "Start Coaching"
-    },
-    {
-      name: "Skills Assessment",
-      description: "Identify skill gaps and get personalized learning recommendations.",
-      icon: "Award",
-      cta: "Assess Skills"
-    },
-    // Row 3 - Placeholder content
-    {
-      name: "Job Tracker",
-      description: "Organize and track all your job applications in one place.",
-      icon: "Calendar",
-      cta: "Track Jobs"
+      name: "Portfolio Optimizer",
+      description: "Real-time score, keyword gap analysis vs. target job description, and auto-rewrite suggestions",
+      icon: "Target",
+      cta: "Optimize Portfolio",
+      route: "/portfolio-optimizer"
     },
     {
       name: "LinkedIn Optimizer",
       description: "Optimize your LinkedIn profile for maximum visibility.",
       icon: "Link",
-      cta: "Optimize Profile"
+      cta: "Optimize Profile",
+      route: "/linkedin-optimizer"
+    },
+    // Row 3
+    {
+      name: "AI Career Coach",
+      description: "Get personalized career coaching and skill gap analysis.",
+      icon: "BrainCircuit",
+      cta: "Start Coaching",
+      route: "/career-coach"
     },
     {
-      name: "Salary Negotiator",
-      description: "Get data-driven insights for salary negotiations.",
-      icon: "Book",
-      cta: "Get Insights"
+      name: "AI Job Search and Tracker",
+      description: "Get personalized right-fit Job recommendations",
+      icon: "Calendar",
+      cta: "Search Jobs",
+      route: "/job-search-tracker"
+    },
+    {
+      name: "AI Interview Coach",
+      description: "Get role specific interview practice with analysis and improvement tips.",
+      icon: "Mic",
+      cta: "Practice Interview",
+      route: "/interview-coach"
     }
   ]
 };
@@ -78,7 +87,9 @@ const iconMap: Record<string, React.ReactNode> = {
   Mail: <Mail className="h-6 w-6 text-portfolioai-accent" />,
   Mic: <Mic className="h-6 w-6 text-portfolioai-accent" />,
   Award: <Award className="h-6 w-6 text-portfolioai-accent" />,
-  Link: <LinkIcon className="h-6 w-6 text-portfolioai-accent" />
+  Link: <LinkIcon className="h-6 w-6 text-portfolioai-accent" />,
+  BrainCircuit: <BrainCircuit className="h-6 w-6 text-portfolioai-accent" />,
+  Target: <Target className="h-6 w-6 text-portfolioai-accent" />
 };
 
 const FeatureCard = ({ feature }: { feature: any }) => {
@@ -91,7 +102,7 @@ const FeatureCard = ({ feature }: { feature: any }) => {
       <CardContent className="flex-grow flex flex-col pt-0">
         <CardDescription className="text-gray-600 mb-4 text-sm flex-grow">{feature.description}</CardDescription>
         <Button className="w-full mt-auto" size="sm" asChild>
-          <Link to="/upload-resume">{feature.cta}</Link>
+          <Link to={feature.route}>{feature.cta}</Link>
         </Button>
       </CardContent>
     </Card>
