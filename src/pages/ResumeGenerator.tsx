@@ -30,6 +30,7 @@ interface Education {
 
 interface Project {
   id: number;
+  title: string;
   description: string;
 }
 
@@ -79,6 +80,7 @@ const ResumeGenerator = () => {
   const [projects, setProjects] = useState<Project[]>([
     {
       id: 1,
+      title: "Project",
       description: ""
     }
   ]);
@@ -120,6 +122,7 @@ const ResumeGenerator = () => {
     const newId = Math.max(...projects.map(proj => proj.id)) + 1;
     setProjects([...projects, {
       id: newId,
+      title: "Project",
       description: ""
     }]);
   };
@@ -136,9 +139,9 @@ const ResumeGenerator = () => {
     ));
   };
 
-  const updateProject = (id: number, value: string) => {
+  const updateProject = (id: number, field: string, value: string) => {
     setProjects(prev => prev.map(proj => 
-      proj.id === id ? { ...proj, description: value } : proj
+      proj.id === id ? { ...proj, [field]: value } : proj
     ));
   };
 
@@ -463,14 +466,19 @@ const ResumeGenerator = () => {
                     <h2 className="text-xl font-semibold text-center text-portfolioai-primary">Projects</h2>
                     {projects.map((project) => (
                       <div key={project.id} className="border border-gray-300 rounded-lg p-6 space-y-4 relative">
-                        <label className="text-sm font-medium text-gray-700">Project</label>
+                        <Input
+                          className="text-sm font-medium text-gray-700 border-none bg-transparent p-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
+                          value={project.title}
+                          onChange={(e) => updateProject(project.id, 'title', e.target.value)}
+                          placeholder="Project"
+                        />
                         <div className="mt-2">
                           <Textarea
                             placeholder="Developed a full-stack e-commerce platform using React and Node.js..."
                             rows={3}
                             className="resize-y"
                             value={project.description}
-                            onChange={(e) => updateProject(project.id, e.target.value)}
+                            onChange={(e) => updateProject(project.id, 'description', e.target.value)}
                           />
                         </div>
                       </div>
