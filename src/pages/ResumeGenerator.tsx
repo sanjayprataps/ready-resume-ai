@@ -463,8 +463,8 @@ const ResumeGenerator = () => {
                     <h2 className="text-xl font-semibold text-center text-portfolioai-primary">Projects</h2>
                     {projects.map((project) => (
                       <div key={project.id} className="border border-gray-300 rounded-lg p-6 space-y-4 relative">
-                        <h3 className="text-lg font-medium text-gray-800 absolute top-4 right-6">Project</h3>
-                        <div className="mt-8">
+                        <label className="text-sm font-medium text-gray-700">Project</label>
+                        <div className="mt-2">
                           <Textarea
                             placeholder="Developed a full-stack e-commerce platform using React and Node.js..."
                             rows={3}
