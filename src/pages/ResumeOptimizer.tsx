@@ -1,4 +1,3 @@
-
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,10 +7,20 @@ import { useState } from "react";
 import { Search, Upload, Target } from "lucide-react";
 import { toast } from "sonner";
 
+interface AnalysisResult {
+  status: string;
+  analysis: {
+    strengths: string;
+    weaknesses: string;
+    suggestions: string;
+  };
+}
+
 const ResumeOptimizer = () => {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [jobDescription, setJobDescription] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -19,17 +28,39 @@ const ResumeOptimizer = () => {
     }
   };
 
-  const handleOptimize = () => {
+  const handleOptimize = async () => {
     if (!resumeFile || !jobDescription) {
       toast.error("Please upload your resume and enter job description");
       return;
     }
     
     setIsAnalyzing(true);
-    setTimeout(() => {
+    setAnalysisResult(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("resume", resumeFile);
+      formData.append("job_description", jobDescription);
+
+      const response = await fetch("http://localhost:8000/analyze-resume", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.status === "success") {
+        setAnalysisResult(data);
+        toast.success("Resume analysis complete!");
+      } else {
+        toast.error(data.message || "Analysis failed");
+      }
+    } catch (error) {
+      toast.error("Failed to analyze resume. Please try again.");
+      console.error("Error:", error);
+    } finally {
       setIsAnalyzing(false);
-      toast.success("Resume analysis complete!");
-    }, 3000);
+    }
   };
 
   return (
@@ -57,7 +88,7 @@ const ResumeOptimizer = () => {
                   <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                   <Input
                     type="file"
-                    accept=".pdf,.doc,.docx"
+                    accept=".pdf"
                     onChange={handleFileChange}
                     className="hidden"
                     id="resume-upload"
@@ -110,6 +141,37 @@ const ResumeOptimizer = () => {
                 </div>
               </CardContent>
             </Card>
+          )}
+
+          {analysisResult && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Key Strengths</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600 whitespace-pre-wrap">{analysisResult.analysis.strengths}</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Areas for Improvement</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600 whitespace-pre-wrap">{analysisResult.analysis.weaknesses}</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Suggestions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600 whitespace-pre-wrap">{analysisResult.analysis.suggestions}</p>
+                </CardContent>
+              </Card>
+            </div>
           )}
         </div>
       </div>
