@@ -1,4 +1,3 @@
-
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,6 +26,11 @@ interface Education {
   location: string;
   graduationDate: string;
   gpa: string;
+}
+
+interface Project {
+  id: number;
+  description: string;
 }
 
 const ResumeGenerator = () => {
@@ -71,6 +75,14 @@ const ResumeGenerator = () => {
   const [technicalSkills, setTechnicalSkills] = useState("");
   const [softSkills, setSoftSkills] = useState("");
 
+  // Projects
+  const [projects, setProjects] = useState<Project[]>([
+    {
+      id: 1,
+      description: ""
+    }
+  ]);
+
   const handleGenerate = (method: string) => {
     setIsGenerating(true);
     setTimeout(() => {
@@ -104,6 +116,14 @@ const ResumeGenerator = () => {
     }]);
   };
 
+  const addProject = () => {
+    const newId = Math.max(...projects.map(proj => proj.id)) + 1;
+    setProjects([...projects, {
+      id: newId,
+      description: ""
+    }]);
+  };
+
   const updateWorkExperience = (id: number, field: string, value: string) => {
     setWorkExperiences(prev => prev.map(exp => 
       exp.id === id ? { ...exp, [field]: value } : exp
@@ -113,6 +133,12 @@ const ResumeGenerator = () => {
   const updateEducation = (id: number, field: string, value: string) => {
     setEducations(prev => prev.map(edu => 
       edu.id === id ? { ...edu, [field]: value } : edu
+    ));
+  };
+
+  const updateProject = (id: number, value: string) => {
+    setProjects(prev => prev.map(proj => 
+      proj.id === id ? { ...proj, description: value } : proj
     ));
   };
 
@@ -427,6 +453,33 @@ const ResumeGenerator = () => {
                           onChange={(e) => setSoftSkills(e.target.value)}
                         />
                       </div>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Projects Section */}
+                  <div className="space-y-4">
+                    <h2 className="text-xl font-semibold text-center text-portfolioai-primary">Projects</h2>
+                    {projects.map((project) => (
+                      <div key={project.id} className="border border-gray-300 rounded-lg p-6 space-y-4 relative">
+                        <h3 className="text-lg font-medium text-gray-800 absolute top-4 right-6">Project</h3>
+                        <div className="mt-8">
+                          <Textarea
+                            placeholder="Developed a full-stack e-commerce platform using React and Node.js..."
+                            rows={3}
+                            className="resize-y"
+                            value={project.description}
+                            onChange={(e) => updateProject(project.id, e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                    <div className="text-center">
+                      <Button variant="outline" onClick={addProject}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Project
+                      </Button>
                     </div>
                   </div>
 
