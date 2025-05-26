@@ -1,3 +1,4 @@
+
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
-import { FileText, Link, User, Plus } from "lucide-react";
+import { FileText, Link, User, Plus, Pen } from "lucide-react";
 import { toast } from "sonner";
 
 interface WorkExperience {
@@ -466,12 +467,18 @@ const ResumeGenerator = () => {
                     <h2 className="text-xl font-semibold text-center text-portfolioai-primary">Projects</h2>
                     {projects.map((project) => (
                       <div key={project.id} className="border border-gray-300 rounded-lg p-6 space-y-4 relative">
-                        <Input
-                          className="text-sm font-medium text-gray-700 border-none bg-transparent p-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
-                          value={project.title}
-                          onChange={(e) => updateProject(project.id, 'title', e.target.value)}
-                          placeholder="Project"
-                        />
+                        <div className="flex items-center gap-2">
+                          <Input
+                            className="text-sm font-medium text-gray-700 border-none bg-transparent p-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0 flex-1"
+                            value={project.title}
+                            onChange={(e) => updateProject(project.id, 'title', e.target.value)}
+                            placeholder="Project"
+                          />
+                          <div className="flex items-center gap-1">
+                            <Pen className="h-3 w-3 text-gray-400" />
+                            <span className="text-xs text-gray-400 font-medium">edit</span>
+                          </div>
+                        </div>
                         <div className="mt-2">
                           <Textarea
                             placeholder="Developed a full-stack e-commerce platform using React and Node.js..."
