@@ -1,3 +1,18 @@
+/**
+ * Resume Optimizer Page Component
+ * -----------------------------
+ * This page allows users to analyze and optimize their resume against a target job description.
+ * It provides AI-powered analysis of strengths, weaknesses, and improvement suggestions.
+ * 
+ * Features:
+ * - Resume file upload
+ * - Job description input
+ * - AI-powered analysis
+ * - Real-time feedback
+ * - Detailed improvement suggestions
+ */
+
+// Import necessary components and utilities
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +22,9 @@ import { useState } from "react";
 import { Search, Upload, Target } from "lucide-react";
 import { toast } from "sonner";
 
+/**
+ * Interface for the analysis result from the API
+ */
 interface AnalysisResult {
   status: string;
   analysis: {
@@ -16,18 +34,35 @@ interface AnalysisResult {
   };
 }
 
+/**
+ * ResumeOptimizer Component
+ * 
+ * Provides a user interface for uploading a resume and analyzing it against a job description.
+ * Displays analysis results including strengths, weaknesses, and improvement suggestions.
+ * 
+ * @returns {JSX.Element} The resume optimizer page
+ */
 const ResumeOptimizer = () => {
+  // State management
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [jobDescription, setJobDescription] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
 
+  /**
+   * Handles file selection for resume upload
+   * @param {React.ChangeEvent<HTMLInputElement>} e - The file input change event
+   */
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setResumeFile(e.target.files[0]);
     }
   };
 
+  /**
+   * Handles the resume optimization process
+   * Sends the resume and job description to the API for analysis
+   */
   const handleOptimize = async () => {
     if (!resumeFile || !jobDescription) {
       toast.error("Please upload your resume and enter job description");
@@ -42,12 +77,29 @@ const ResumeOptimizer = () => {
       formData.append("resume", resumeFile);
       formData.append("job_description", jobDescription);
 
+      console.log("Sending request to analyze resume...");
+      console.log("File:", resumeFile.name, "Size:", resumeFile.size);
+      console.log("Job description length:", jobDescription.length);
+
       const response = await fetch("http://localhost:8000/analyze-resume", {
         method: "POST",
         body: formData,
+        headers: {
+          // Don't set Content-Type header - let the browser set it with the boundary
+          Accept: "application/json",
+        },
       });
 
+      console.log("Response status:", response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Server response:", errorText);
+        throw new Error(`Server responded with status ${response.status}: ${errorText}`);
+      }
+
       const data = await response.json();
+      console.log("Response data:", data);
 
       if (data.status === "success") {
         setAnalysisResult(data);
@@ -56,8 +108,8 @@ const ResumeOptimizer = () => {
         toast.error(data.message || "Analysis failed");
       }
     } catch (error) {
-      toast.error("Failed to analyze resume. Please try again.");
-      console.error("Error:", error);
+      console.error("Detailed error:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to analyze resume. Please try again.");
     } finally {
       setIsAnalyzing(false);
     }
@@ -67,6 +119,7 @@ const ResumeOptimizer = () => {
     <MainLayout>
       <div className="py-12 md:py-16 bg-gray-50">
         <div className="container">
+          {/* Header section */}
           <div className="text-center max-w-2xl mx-auto mb-12">
             <div className="mb-4">
               <Search className="h-12 w-12 text-portfolioai-accent mx-auto" />
@@ -77,7 +130,9 @@ const ResumeOptimizer = () => {
             </p>
           </div>
 
+          {/* Main content grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Resume upload card */}
             <Card>
               <CardHeader>
                 <CardTitle>Upload Your Resume</CardTitle>
@@ -106,6 +161,7 @@ const ResumeOptimizer = () => {
               </CardContent>
             </Card>
 
+            {/* Job description input card */}
             <Card>
               <CardHeader>
                 <CardTitle>Job Description</CardTitle>
@@ -122,6 +178,7 @@ const ResumeOptimizer = () => {
             </Card>
           </div>
 
+          {/* Optimize button */}
           <div className="text-center mt-8">
             <Button 
               onClick={handleOptimize}
@@ -132,6 +189,7 @@ const ResumeOptimizer = () => {
             </Button>
           </div>
 
+          {/* Loading state */}
           {isAnalyzing && (
             <Card className="mt-8">
               <CardContent className="p-6">
@@ -143,8 +201,10 @@ const ResumeOptimizer = () => {
             </Card>
           )}
 
+          {/* Analysis results */}
           {analysisResult && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+              {/* Strengths card */}
               <Card>
                 <CardHeader>
                   <CardTitle>Key Strengths</CardTitle>
@@ -154,6 +214,7 @@ const ResumeOptimizer = () => {
                 </CardContent>
               </Card>
 
+              {/* Weaknesses card */}
               <Card>
                 <CardHeader>
                   <CardTitle>Areas for Improvement</CardTitle>
@@ -163,6 +224,7 @@ const ResumeOptimizer = () => {
                 </CardContent>
               </Card>
 
+              {/* Suggestions card */}
               <Card>
                 <CardHeader>
                   <CardTitle>Suggestions</CardTitle>

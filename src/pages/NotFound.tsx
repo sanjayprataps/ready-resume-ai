@@ -1,9 +1,32 @@
+/**
+ * 404 Not Found Page Component
+ * ---------------------------
+ * This component is rendered when a user attempts to access a non-existent route.
+ * It provides a user-friendly error message and a way to return to the home page.
+ * 
+ * Features:
+ * - Error logging for debugging
+ * - Clean and simple UI
+ * - Easy navigation back to home
+ */
+
+// Import necessary hooks
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 
+/**
+ * NotFound Component
+ * 
+ * Displays a 404 error page when a user navigates to a non-existent route.
+ * Logs the attempted path for debugging purposes.
+ * 
+ * @returns {JSX.Element} The 404 error page
+ */
 const NotFound = () => {
+  // Get the current location for logging
   const location = useLocation();
 
+  // Log the 404 error when the component mounts
   useEffect(() => {
     console.error(
       "404 Error: User attempted to access non-existent route:",

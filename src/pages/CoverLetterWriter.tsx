@@ -1,4 +1,19 @@
+/**
+ * Cover Letter Writer Page Component
+ * ---------------------------------
+ * This page allows users to generate personalized cover letters using their resume and job details.
+ * It provides an AI-powered cover letter generation service that matches the user's experience
+ * with the target job requirements.
+ * 
+ * Features:
+ * - Resume file upload
+ * - Job details input
+ * - Job description analysis
+ * - AI-powered cover letter generation
+ * - Real-time feedback
+ */
 
+// Import necessary components and utilities
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,19 +23,36 @@ import { useState } from "react";
 import { Mail, Upload, FileText } from "lucide-react";
 import { toast } from "sonner";
 
+/**
+ * CoverLetterWriter Component
+ * 
+ * Provides a user interface for generating personalized cover letters based on resume
+ * and job details. Handles file upload, form input, and cover letter generation process.
+ * 
+ * @returns {JSX.Element} The cover letter writer page
+ */
 const CoverLetterWriter = () => {
+  // State management for form inputs and generation status
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [jobDescription, setJobDescription] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [positionTitle, setPositionTitle] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
 
+  /**
+   * Handles file selection for resume upload
+   * @param {React.ChangeEvent<HTMLInputElement>} e - The file input change event
+   */
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setResumeFile(e.target.files[0]);
     }
   };
 
+  /**
+   * Handles the cover letter generation process
+   * Validates inputs and triggers the generation process
+   */
   const handleGenerate = () => {
     if (!resumeFile || !jobDescription || !companyName || !positionTitle) {
       toast.error("Please fill in all required fields");
@@ -38,6 +70,7 @@ const CoverLetterWriter = () => {
     <MainLayout>
       <div className="py-12 md:py-16 bg-gray-50">
         <div className="container">
+          {/* Header section */}
           <div className="text-center max-w-2xl mx-auto mb-12">
             <div className="mb-4">
               <Mail className="h-12 w-12 text-portfolioai-accent mx-auto" />
@@ -48,8 +81,11 @@ const CoverLetterWriter = () => {
             </p>
           </div>
 
+          {/* Main content grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left column: Job info and resume upload */}
             <div className="space-y-6">
+              {/* Job information card */}
               <Card>
                 <CardHeader>
                   <CardTitle>Job Information</CardTitle>
@@ -75,6 +111,7 @@ const CoverLetterWriter = () => {
                 </CardContent>
               </Card>
 
+              {/* Resume upload card */}
               <Card>
                 <CardHeader>
                   <CardTitle>Upload Your Resume</CardTitle>
@@ -104,6 +141,7 @@ const CoverLetterWriter = () => {
               </Card>
             </div>
 
+            {/* Right column: Job description input */}
             <Card>
               <CardHeader>
                 <CardTitle>Job Description</CardTitle>
@@ -120,6 +158,7 @@ const CoverLetterWriter = () => {
             </Card>
           </div>
 
+          {/* Generate button */}
           <div className="text-center mt-8">
             <Button 
               onClick={handleGenerate}
@@ -130,6 +169,7 @@ const CoverLetterWriter = () => {
             </Button>
           </div>
 
+          {/* Loading state */}
           {isGenerating && (
             <Card className="mt-8">
               <CardContent className="p-6">
