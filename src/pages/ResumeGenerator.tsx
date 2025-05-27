@@ -17,6 +17,7 @@ import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useRef } from "react";
 import { FileText, Link, User, Download, Plus, Trash2 } from "lucide-react";
@@ -567,7 +568,7 @@ const ResumeGenerator = () => {
             </p>
           </div>
 
-          <Card className="max-w-3xl mx-auto">
+          <Card className="max-w-4xl mx-auto">
             <CardHeader>
               <CardTitle>Choose Your Method</CardTitle>
               <CardDescription>Select how you'd like to generate your resume</CardDescription>
@@ -899,6 +900,7 @@ const ResumeGenerator = () => {
                       disabled={isGenerating}
                       className="w-full bg-portfolioai-primary hover:bg-portfolioai-secondary"
                     >
+                      {isGenerating ? "Generating..." : "Generate Resume"}
                       {isGenerating ? "Generating..." : "Generate Resume"}
                     </Button>
                   </div>
