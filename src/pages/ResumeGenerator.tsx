@@ -22,7 +22,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useRef } from "react";
 import { FileText, Link, User, Download, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -900,7 +899,6 @@ const ResumeGenerator = () => {
                       disabled={isGenerating}
                       className="w-full bg-portfolioai-primary hover:bg-portfolioai-secondary"
                     >
-                      {isGenerating ? "Generating..." : "Generate Resume"}
                       {isGenerating ? "Generating..." : "Generate Resume"}
                     </Button>
                   </div>
