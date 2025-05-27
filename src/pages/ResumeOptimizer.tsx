@@ -21,6 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { Search, Upload, Target } from "lucide-react";
 import { toast } from "sonner";
+import { API_ENDPOINTS } from "@/config";
 
 /**
  * Interface for the analysis result from the API
@@ -81,7 +82,7 @@ const ResumeOptimizer = () => {
       console.log("File:", resumeFile.name, "Size:", resumeFile.size);
       console.log("Job description length:", jobDescription.length);
 
-      const response = await fetch("http://localhost:8000/analyze-resume", {
+      const response = await fetch(API_ENDPOINTS.ANALYZE_RESUME, {
         method: "POST",
         body: formData,
         headers: {

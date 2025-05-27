@@ -28,7 +28,14 @@ app = FastAPI(title="Resume Services API")
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:8080", "http://127.0.0.1:8080"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:8080",
+        "http://127.0.0.1:8080",
+        "https://id-preview--2b0cdaca-c7f6-45c8-beac-90c14d77ce88.lovable.app",
+        "https://*.lovable.app"  # Allow all Lovable preview URLs
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

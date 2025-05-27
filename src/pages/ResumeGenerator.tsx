@@ -34,6 +34,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { jsPDF } from "jspdf";
+import { API_ENDPOINTS } from "@/config";
 
 interface Experience {
   job_title: string;
@@ -252,7 +253,7 @@ const ResumeGenerator = () => {
     try {
       console.log("Sending resume data:", resumeData);  // Debug log
       
-      const response = await fetch("http://localhost:8000/generate-resume", {
+      const response = await fetch(API_ENDPOINTS.GENERATE_RESUME, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
