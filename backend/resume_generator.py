@@ -1,48 +1,16 @@
 """
-Resume Generator API Backend
----------------------------
-This file implements the FastAPI backend for the Resume Generator application.
-It provides endpoints for generating professional resumes using the Groq LLM API.
-The application takes user input in a structured format and generates a well-formatted
-resume with proper sections and formatting.
-
-Key Features:
-- FastAPI endpoints for resume generation
-- Integration with Groq LLM API
-- Input validation using Pydantic models
-- Structured resume formatting
-- Error handling and response validation
+Resume Generator Core Logic
+-------------------------
+This file contains the core logic for generating professional resumes.
+The actual API endpoints are defined in main.py.
 """
 
 import os
 import groq
-from typing import Dict
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
+from typing import Dict, List, Optional
 from pydantic import BaseModel
-from typing import List, Dict, Optional
-from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
-
-# Verify API key is set
-if not os.getenv("GROQ_API_KEY"):
-    raise ValueError("GROQ_API_KEY environment variable is not set. Please set it in your .env file.")
-
-# Initialize FastAPI application
-app = FastAPI(title="Resume Generator API")
-
-# Add CORS middleware to allow frontend requests
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Pydantic models for request validation and data structure
+# Pydantic models for data structure
 class Experience(BaseModel):
     """Model for work experience entries"""
     job_title: str
@@ -178,8 +146,7 @@ def format_input_for_prompt(form_data: ResumeData) -> str:
         projects="\n\n".join(project_blocks),
     )
 
-@app.post("/generate-resume")
-async def generate_resume(resume_data: ResumeData):
+def generate_resume(resume_data: ResumeData):
     """
     Generate a professional resume using the Groq LLM API.
     
@@ -187,10 +154,10 @@ async def generate_resume(resume_data: ResumeData):
         resume_data (ResumeData): The structured resume data from the user
         
     Returns:
-        dict: Generated resume data or error message
+        dict: Generated resume data
         
     Raises:
-        HTTPException: If there's an error in resume generation
+        Exception: If there's an error in resume generation
     """
     try:
         # Initialize Groq client
@@ -282,26 +249,12 @@ async def generate_resume(resume_data: ResumeData):
                 }
             except json.JSONDecodeError as e:
                 print(f"JSON parsing error. Response text: {output_text}")
-                raise HTTPException(
-                    status_code=500,
-                    detail=f"Failed to parse AI response as JSON: {str(e)}"
-                )
+                raise ValueError(f"Failed to parse AI response as JSON: {str(e)}")
                 
         except Exception as e:
             print(f"Groq API error: {str(e)}")
-            raise HTTPException(
-                status_code=500,
-                detail=f"Groq API error: {str(e)}"
-            )
+            raise ValueError(f"Groq API error: {str(e)}")
             
     except Exception as e:
         print(f"Error in generate_resume: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to generate resume: {str(e)}"
-        )
-
-@app.get("/")
-async def root():
-    """Root endpoint that returns a welcome message"""
-    return {"message": "Welcome to Resume Generator API. Use POST /generate-resume to generate a resume."}
+        raise ValueError(f"Failed to generate resume: {str(e)}")

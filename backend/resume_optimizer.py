@@ -1,38 +1,15 @@
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-import PyPDF2
+"""
+Resume Optimizer Core Logic
+--------------------------
+This file contains the core logic for analyzing resumes against job descriptions.
+The actual API endpoints are defined in main.py.
+"""
+
 import os
 import groq
-from typing import Optional
-from pydantic import BaseModel
-from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
-
-# Verify API key is set
-if not os.getenv("GROQ_API_KEY"):
-    raise ValueError("GROQ_API_KEY environment variable is not set. Please set it in your .env file.")
-
-# Initialize FastAPI app
-app = FastAPI(
-    title="Resume Analysis API",
-    description="API for analyzing resumes against job descriptions",
-    version="1.0.0"
-)
-
-# Add CORS middleware with more specific configuration
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:8080", "http://127.0.0.1:8080"],  # Add your frontend URL
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-class JobDescription(BaseModel):
-    description: str
+from typing import Dict
+import PyPDF2
+from fastapi import HTTPException
 
 def extract_text_from_pdf(pdf_file):
     try:
@@ -47,94 +24,206 @@ def extract_text_from_pdf(pdf_file):
 
 def analyze_resume(resume_text: str, job_desc: str):
     try:
+        print("\n" + "="*50)
+        print("STARTING RESUME ANALYSIS")
+        print("="*50)
+        
         # Initialize Groq client
         client = groq.Groq(
             api_key=os.getenv("GROQ_API_KEY")
         )
         
-        prompt = f"""
-        Analyze the following resume against the job description:
+        # Debug log for model verification
+        print("\n=== Model Configuration ===")
+        target_model = "meta-llama/llama-4-maverick-17b-128e-instruct"
+        print(f"Attempting to use model: {target_model}")
         
+        prompt = f"""
+        Analyze this resume against the job description and provide a structured analysis.
+        Format your response EXACTLY as shown below, with bullet points.
+        DO NOT include any thinking process, analysis steps, or additional text.
+        DO NOT use any markers like <think> or similar.
+        Start directly with the section headers and bullet points.
+
         Resume:
         {resume_text}
         
         Job Description:
         {job_desc}
         
-        Please provide:
-        1. Key strengths matching the job requirements
-        2. Areas of improvement or missing skills
-        3. Specific suggestions to improve the resume
+        Required format:
+        1. Key Strengths:
+        • [First strength]
+        • [Second strength]
+        • [Third strength]
+        
+        2. Areas for Improvement:
+        • [First area]
+        • [Second area]
+        • [Third area]
+        
+        3. Suggestions:
+        • [First suggestion]
+        • [Second suggestion]
+        • [Third suggestion]
         """
         
-        completion = client.chat.completions.create(
-            model="deepseek-r1-distill-llama-70b",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.7,
-            max_tokens=1000
-        )
-        
-        response_text = completion.choices[0].message.content
-        return {
-            "strengths": response_text.split("1.")[1].split("2.")[0].strip(),
-            "weaknesses": response_text.split("2.")[1].split("3.")[0].strip(),
-            "suggestions": response_text.split("3.")[1].strip()
-        }
-    except Exception as e:
-        print(f"Error in analyze_resume: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
-
-@app.post("/analyze-resume", response_model=dict)
-async def analyze_resume_endpoint(
-    resume: UploadFile = File(description="Upload your resume in PDF format"),
-    job_description: str = Form(description="Paste the job description here")
-):
-    """
-    Analyze a resume against a job description.
-    
-    - **resume**: Upload your resume in PDF format
-    - **job_description**: Paste the job description here
-    """
-    try:
-        print(f"Received resume file: {resume.filename}, content type: {resume.content_type}")
-        print(f"Job description length: {len(job_description)}")
-        
-        if not resume.filename.lower().endswith('.pdf'):
-            raise HTTPException(status_code=400, detail="Only PDF files are supported")
-        
-        # Extract text from resume
+        print("\n=== Making API Call ===")
         try:
-            resume_text = extract_text_from_pdf(resume.file)
-            print(f"Extracted text length: {len(resume_text)}")
-            if not resume_text.strip():
-                raise HTTPException(status_code=400, detail="Could not extract text from the PDF file")
-        except Exception as e:
-            print(f"Error extracting text from PDF: {str(e)}")
-            raise HTTPException(status_code=400, detail=f"Error processing PDF file: {str(e)}")
-        
-        # Get analysis from API
-        try:
-            analysis = analyze_resume(resume_text, job_description)
-            return JSONResponse(
-                content={
-                    "status": "success",
-                    "analysis": analysis
-                }
+            completion = client.chat.completions.create(
+                model=target_model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": """You are a resume analysis expert. Your task is to analyze resumes against job descriptions.
+                        Provide ONLY bullet-pointed analysis in the exact format requested.
+                        DO NOT include any thinking process, analysis steps, or additional text.
+                        DO NOT use any markers like <think> or similar.
+                        Start directly with the section headers and bullet points.
+                        Each section should contain 3-5 bullet points of relevant analysis.
+                        Keep the analysis concise and focused on the most important points."""
+                    },
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.3,  # Lower temperature for more focused responses
+                max_tokens=1000
             )
-        except Exception as e:
-            print(f"Error during analysis: {str(e)}")
-            raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
-    except HTTPException as he:
-        raise he
+            
+            # Debug log for model response
+            print("\n=== Model Response ===")
+            actual_model = completion.model
+            print(f"Actual model used: {actual_model}")
+            if actual_model != target_model:
+                print(f"WARNING: Model mismatch! Expected {target_model} but got {actual_model}")
+            print(f"Response length: {len(completion.choices[0].message.content)}")
+            
+            response_text = completion.choices[0].message.content.strip()
+            print("\n=== Raw Response from Groq ===")
+            print(response_text)
+            print("="*50 + "\n")
+            
+            # Clean up the response
+            def clean_text(text):
+                print("\n=== Cleaning Text ===")
+                print("Original text:", text)
+                
+                # Remove any thinking markers and their content
+                text = text.replace("<think>", "").replace("</think>", "")
+                text = text.replace("<thinking>", "").replace("</thinking>", "")
+                
+                # Remove any text before the first section header
+                if "1. Key Strengths:" in text:
+                    text = text[text.index("1. Key Strengths:"):]
+                
+                # Split into lines and clean each line
+                lines = text.split("\n")
+                cleaned_lines = []
+                skip_line = False
+                
+                print("\nProcessing lines:")
+                for line in lines:
+                    original_line = line
+                    # Skip lines that contain thinking process markers
+                    if any(marker in line.lower() for marker in [
+                        "let me", "i need to", "i will", "first,", "next,", "then,", "finally,",
+                        "alright", "so,", "let's", "i'll", "i'm going to", "i should",
+                        "i think", "i believe", "in my opinion", "looking at", "analyzing",
+                        "considering", "examining", "reviewing", "evaluating", "okay, so",
+                        "let me start", "let me begin", "first,", "looking at", "based on",
+                        "from the", "in this", "the job", "the resume", "the candidate"
+                    ]):
+                        print(f"Skipping line (thinking process): {original_line}")
+                        skip_line = True
+                        continue
+                    
+                    # Skip empty lines or lines with just whitespace
+                    if not line.strip():
+                        print(f"Skipping empty line")
+                        continue
+                    
+                    # If we find a section header, stop skipping lines
+                    if line.strip().startswith(("1.", "2.", "3.")):
+                        print(f"Found section header: {original_line}")
+                        skip_line = False
+                    
+                    if not skip_line:
+                        # Only keep lines that start with bullet points or section headers
+                        if line.strip().startswith(("•", "1.", "2.", "3.")):
+                            print(f"Keeping line: {original_line}")
+                            cleaned_lines.append(line)
+                        else:
+                            print(f"Skipping line (not a bullet point or header): {original_line}")
+                
+                # Join the cleaned lines back together
+                cleaned_text = "\n".join(cleaned_lines)
+                
+                # Ensure we have the proper section structure
+                if not cleaned_text.startswith("1. Key Strengths:"):
+                    cleaned_text = "1. Key Strengths:\n" + cleaned_text
+                
+                print("\nCleaned text:", cleaned_text)
+                print("=============================\n")
+                return cleaned_text.strip()
+            
+            # Clean the entire response
+            response_text = clean_text(response_text)
+            
+            # More robust parsing of the response
+            try:
+                print("\n=== Parsing Sections ===")
+                # Split by section headers
+                sections = response_text.split("1. Key Strengths:")
+                print(f"Found {len(sections)} sections after splitting by Key Strengths")
+                
+                if len(sections) < 2:
+                    raise ValueError("Response missing Key Strengths section")
+                
+                strengths_section = sections[1].split("2. Areas for Improvement:")
+                print(f"Found {len(strengths_section)} sections after splitting by Areas for Improvement")
+                
+                if len(strengths_section) < 2:
+                    raise ValueError("Response missing Areas for Improvement section")
+                
+                weaknesses_section = strengths_section[1].split("3. Suggestions:")
+                print(f"Found {len(weaknesses_section)} sections after splitting by Suggestions")
+                
+                if len(weaknesses_section) < 2:
+                    raise ValueError("Response missing Suggestions section")
+                
+                # Clean each section
+                strengths = clean_text(strengths_section[0])
+                weaknesses = clean_text(weaknesses_section[0])
+                suggestions = clean_text(weaknesses_section[1])
+                
+                print("\n=== Final Sections ===")
+                print("Strengths:", strengths)
+                print("Weaknesses:", weaknesses)
+                print("Suggestions:", suggestions)
+                print("=============================\n")
+                
+                return {
+                    "strengths": strengths,
+                    "weaknesses": weaknesses,
+                    "suggestions": suggestions
+                }
+            except Exception as parse_error:
+                print(f"\nError parsing response: {str(parse_error)}")
+                print(f"Raw response: {response_text}")
+                # Fallback to simple splitting if structured parsing fails
+                parts = response_text.split("\n\n")
+                if len(parts) >= 3:
+                    return {
+                        "strengths": clean_text(parts[0]),
+                        "weaknesses": clean_text(parts[1]),
+                        "suggestions": clean_text(parts[2])
+                    }
+                else:
+                    raise ValueError("Could not parse the analysis response")
+                    
+        except Exception as api_error:
+            print(f"\nError calling Groq API: {str(api_error)}")
+            raise HTTPException(status_code=500, detail=f"Groq API error: {str(api_error)}")
+                
     except Exception as e:
-        print(f"Unexpected error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
-
-@app.get("/")
-async def root():
-    return {
-        "message": "Welcome to Resume Analysis API",
-        "endpoints": {
-            "analyze_resume": "POST /analyze-resume - Analyze a resume against a job description"
-        }
-    }
+        print(f"\nError in analyze_resume: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
