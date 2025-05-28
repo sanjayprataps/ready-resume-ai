@@ -8,12 +8,14 @@ It imports and uses the core logic from resume_optimizer.py and resume_generator
 import os
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from dotenv import load_dotenv
+from io import BytesIO
 
 # Import core logic from other files
 from resume_optimizer import extract_text_from_pdf, analyze_resume
 from resume_generator import ResumeData, generate_resume
+from coverletter_writer import generate_cover_letter, CoverLetterInput
 
 # Load environment variables from .env file
 load_dotenv()
@@ -99,6 +101,57 @@ async def generate_resume_endpoint(resume_data: ResumeData):
     except Exception as e:
         print(f"Error in generate_resume_endpoint: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to generate resume: {str(e)}")
+
+@app.post("/api/generate-cover-letter")
+async def generate_cover_letter_endpoint(
+    company_name: str = Form(...),
+    position_title: str = Form(...),
+    job_description: str = Form(...),
+    resume: UploadFile = File(...)
+):
+    """
+    Generate a personalized cover letter based on resume and job details.
+    
+    Args:
+        company_name (str): Name of the company
+        position_title (str): Title of the position
+        job_description (str): Job description text
+        resume (UploadFile): Resume PDF file
+        
+    Returns:
+        StreamingResponse: PDF file of the generated cover letter
+    """
+    try:
+        # Validate file type
+        if not resume.filename.lower().endswith('.pdf'):
+            raise HTTPException(status_code=400, detail="Only PDF files are allowed")
+        
+        # Extract text from resume
+        resume_text = extract_text_from_pdf(resume.file)
+        
+        # Generate cover letter
+        result = generate_cover_letter(CoverLetterInput(
+            company_name=company_name,
+            position_title=position_title,
+            job_description=job_description,
+            resume_text=resume_text
+        ))
+        
+        # Return PDF file
+        return StreamingResponse(
+            BytesIO(result["pdf"]),
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f"attachment; filename=cover_letter_{company_name.lower().replace(' ', '_')}.pdf"
+            }
+        )
+        
+    except Exception as e:
+        print(f"Error in generate_cover_letter_endpoint: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        # Close the uploaded file
+        await resume.close()
 
 @app.get("/")
 async def root():

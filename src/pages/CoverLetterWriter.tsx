@@ -11,6 +11,7 @@
  * - Job description analysis
  * - AI-powered cover letter generation
  * - Real-time feedback
+ * - PDF preview and download
  */
 
 // Import necessary components and utilities
@@ -20,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
-import { Mail, Upload, FileText } from "lucide-react";
+import { Mail, Upload, FileText, Download, Eye } from "lucide-react";
 import { toast } from "sonner";
 
 /**
@@ -38,6 +39,8 @@ const CoverLetterWriter = () => {
   const [companyName, setCompanyName] = useState("");
   const [positionTitle, setPositionTitle] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [coverLetterPdf, setCoverLetterPdf] = useState<string | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
 
   /**
    * Handles file selection for resume upload
@@ -53,17 +56,62 @@ const CoverLetterWriter = () => {
    * Handles the cover letter generation process
    * Validates inputs and triggers the generation process
    */
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!resumeFile || !jobDescription || !companyName || !positionTitle) {
       toast.error("Please fill in all required fields");
       return;
     }
     
     setIsGenerating(true);
-    setTimeout(() => {
-      setIsGenerating(false);
+    
+    try {
+      // Create form data
+      const formData = new FormData();
+      formData.append("company_name", companyName);
+      formData.append("position_title", positionTitle);
+      formData.append("job_description", jobDescription);
+      formData.append("resume", resumeFile);
+
+      // Send request to API with correct port
+      const response = await fetch("http://localhost:8000/api/generate-cover-letter", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`Failed to generate cover letter: ${errorData}`);
+      }
+
+      // Get the PDF blob
+      const pdfBlob = await response.blob();
+      
+      // Create URL for preview
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      setCoverLetterPdf(pdfUrl);
+      setShowPreview(true);
+      
       toast.success("Cover letter generated successfully!");
-    }, 3000);
+    } catch (error) {
+      console.error("Error generating cover letter:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to generate cover letter. Please try again.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  /**
+   * Handles downloading the generated cover letter
+   */
+  const handleDownload = () => {
+    if (coverLetterPdf) {
+      const link = document.createElement("a");
+      link.href = coverLetterPdf;
+      link.download = `cover_letter_${companyName.toLowerCase().replace(" ", "_")}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
 
   return (
@@ -176,6 +224,45 @@ const CoverLetterWriter = () => {
                 <div className="text-center">
                   <FileText className="h-8 w-8 text-portfolioai-accent mx-auto mb-4 animate-spin" />
                   <p className="text-gray-600">Crafting your personalized cover letter...</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Cover Letter Preview */}
+          {showPreview && coverLetterPdf && (
+            <Card className="mt-8">
+              <CardHeader>
+                <CardTitle>Cover Letter Preview</CardTitle>
+                <CardDescription>Review your generated cover letter</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {/* PDF Preview */}
+                  <div className="border rounded-lg overflow-hidden h-[600px]">
+                    <iframe
+                      src={coverLetterPdf}
+                      className="w-full h-full"
+                      title="Cover Letter Preview"
+                    />
+                  </div>
+                  
+                  {/* Download Button */}
+                  <div className="flex justify-center space-x-4">
+                    <Button
+                      onClick={handleDownload}
+                      className="bg-portfolioai-primary hover:bg-portfolioai-secondary"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download PDF
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowPreview(false)}
+                    >
+                      Close Preview
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
