@@ -11,4 +11,5 @@ export const API_BASE_URL = isLovablePreview
 export const API_ENDPOINTS = {
   GENERATE_RESUME: `${API_BASE_URL}/generate-resume`,
   ANALYZE_RESUME: `${API_BASE_URL}/analyze-resume`,
+  GENERATE_PORTFOLIO: `${API_BASE_URL}/api/generate-portfolio`
 }; 

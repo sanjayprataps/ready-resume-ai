@@ -211,7 +211,11 @@ const ResumeOptimizer = () => {
                   <CardTitle>Key Strengths</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600 whitespace-pre-wrap">{analysisResult.analysis.strengths}</p>
+                  <div className="text-gray-600 whitespace-pre-wrap">
+                    {analysisResult.analysis.strengths.split('\n').map((line, index) => (
+                      <p key={index} className="mb-2">{line}</p>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
 
@@ -221,7 +225,11 @@ const ResumeOptimizer = () => {
                   <CardTitle>Areas for Improvement</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600 whitespace-pre-wrap">{analysisResult.analysis.weaknesses}</p>
+                  <div className="text-gray-600 whitespace-pre-wrap">
+                    {analysisResult.analysis.weaknesses.split('\n').map((line, index) => (
+                      <p key={index} className="mb-2">{line}</p>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
 
@@ -231,7 +239,11 @@ const ResumeOptimizer = () => {
                   <CardTitle>Suggestions</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600 whitespace-pre-wrap">{analysisResult.analysis.suggestions}</p>
+                  <div className="text-gray-600 whitespace-pre-wrap">
+                    {analysisResult.analysis.suggestions.split('\n').map((line, index) => (
+                      <p key={index} className="mb-2">{line}</p>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             </div>

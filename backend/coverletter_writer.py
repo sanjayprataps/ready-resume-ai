@@ -86,10 +86,6 @@ def create_pdf_cover_letter(cover_letter_data: Dict) -> BytesIO:
     story.append(Paragraph(current_date, styles['CustomTitle']))
     story.append(Spacer(1, 12))
     
-    # Add company address
-    story.append(Paragraph(cover_letter_data['company_address'], styles['CustomBody']))
-    story.append(Spacer(1, 12))
-    
     # Add salutation
     story.append(Paragraph(cover_letter_data['salutation'], styles['CustomBody']))
     story.append(Spacer(1, 12))
@@ -183,20 +179,20 @@ def generate_cover_letter(input_data: CoverLetterInput) -> Dict:
         4. Keep it concise (3-4 paragraphs)
         5. Include a clear call to action
         6. Format as a proper business letter with:
-           - Date
-           - Company address
-           - Salutation
+           - Current date (use today's date)
+           - Salutation (use "Dear Hiring Manager")
            - Body paragraphs
            - Closing
            - Signature
         
+        Important: DO NOT include any address information in the cover letter.
+        
         Return the cover letter in this exact format:
         {{
-            "date": "Current date",
-            "company_address": "Company address block",
-            "salutation": "Dear [Hiring Manager/Name]",
+            "date": "Current date in Month Day, Year format",
+            "salutation": "Dear Hiring Manager",
             "body": "Cover letter body paragraphs",
-            "closing": "Sincerely/Regards",
+            "closing": "Sincerely",
             "signature": "Your Name"
         }}
         """
@@ -210,10 +206,18 @@ def generate_cover_letter(input_data: CoverLetterInput) -> Dict:
                         "role": "system",
                         "content": """You are a professional cover letter writing expert. 
                         Your task is to generate personalized, compelling cover letters that match 
-                        the candidate's experience with the job requirements. 
-                        Always return a properly formatted JSON object with the specified fields.
-                        Focus on creating a unique, engaging narrative that demonstrates the candidate's 
-                        value proposition."""
+                        the candidate's experience with the job requirements.
+                        
+                        Important rules:
+                        1. NEVER include any address information in the cover letter
+                        2. Start with the date, followed by salutation
+                        3. For salutation, use "Dear Hiring Manager"
+                        4. Use today's date in Month Day, Year format
+                        5. Keep the tone professional and engaging
+                        6. Focus on creating a unique, engaging narrative that demonstrates the candidate's 
+                           value proposition
+                        7. Always return a properly formatted JSON object with the specified fields
+                        """
                     },
                     {"role": "user", "content": prompt}
                 ],
@@ -238,7 +242,7 @@ def generate_cover_letter(input_data: CoverLetterInput) -> Dict:
                 cover_letter_data = json.loads(response_text)
                 
                 # Validate required fields
-                required_fields = ["date", "company_address", "salutation", "body", "closing", "signature"]
+                required_fields = ["date", "salutation", "body", "closing", "signature"]
                 missing_fields = [field for field in required_fields if field not in cover_letter_data]
                 
                 if missing_fields:

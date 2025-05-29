@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ personal_info.name }} – Professional Portfolio</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --text-color: #333;
+            --light-gray: #f5f6fa;
+            --border-color: #dcdde1;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--light-gray);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            background-color: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            text-align: center;
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .title {
+            color: var(--secondary-color);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        section {
+            background-color: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .experience-item, .education-item, .project-item {
+            margin-bottom: 1.5rem;
+        }
+        
+        .experience-item h3, .education-item h3, .project-item h3 {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .experience-item .meta, .education-item .meta {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .skills-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        
+        .skill-category {
+            background-color: var(--light-gray);
+            padding: 1rem;
+            border-radius: 4px;
+        }
+        
+        .skill-category h3 {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .skill-list {
+            list-style: none;
+        }
+        
+        .skill-list li {
+            display: inline-block;
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            margin: 0.2rem;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            header, section {
+                padding: 1.5rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>{{ personal_info.name }}</h1>
+                <p class="title">{{ personal_info.title }}</p>
+                <p>{{ personal_info.summary }}</p>
+                <div class="contact-info">
+                    {% if personal_info.email %}
+                    <div class="contact-item">
+                        <span>📧</span>
+                        <a href="mailto:{{ personal_info.email }}">{{ personal_info.email }}</a>
+                    </div>
+                    {% endif %}
+                    {% if personal_info.phone %}
+                    <div class="contact-item">
+                        <span>📱</span>
+                        <span>{{ personal_info.phone }}</span>
+                    </div>
+                    {% endif %}
+                    {% if personal_info.location %}
+                    <div class="contact-item">
+                        <span>📍</span>
+                        <span>{{ personal_info.location }}</span>
+                    </div>
+                    {% endif %}
+                    {% if personal_info.linkedin %}
+                    <div class="contact-item">
+                        <span>🔗</span>
+                        <a href="{{ personal_info.linkedin }}" target="_blank">LinkedIn</a>
+                    </div>
+                    {% endif %}
+                    {% if personal_info.website %}
+                    <div class="contact-item">
+                        <span>🌐</span>
+                        <a href="{{ personal_info.website }}" target="_blank">Website</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </header>
+
+        <section>
+            <h2>Experience</h2>
+            {% for job in experience %}
+            <div class="experience-item">
+                <h3>{{ job.title }}</h3>
+                <div class="meta">
+                    <span>{{ job.company }}</span> • 
+                    <span>{{ job.period }}</span> • 
+                    <span>{{ job.location }}</span>
+                </div>
+                <p>{{ job.description }}</p>
+                {% if job.achievements %}
+                <ul>
+                    {% for achievement in job.achievements %}
+                    <li>{{ achievement }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </section>
+
+        <section>
+            <h2>Education</h2>
+            {% for edu in education %}
+            <div class="education-item">
+                <h3>{{ edu.degree }}</h3>
+                <div class="meta">
+                    <span>{{ edu.institution }}</span> • 
+                    <span>{{ edu.period }}</span> • 
+                    <span>{{ edu.location }}</span>
+                    {% if edu.gpa %}
+                    • <span>GPA: {{ edu.gpa }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </section>
+
+        <section>
+            <h2>Skills</h2>
+            <div class="skills-container">
+                <div class="skill-category">
+                    <h3>Technical Skills</h3>
+                    <ul class="skill-list">
+                        {% for skill in skills.technical %}
+                        <li>{{ skill }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="skill-category">
+                    <h3>Soft Skills</h3>
+                    <ul class="skill-list">
+                        {% for skill in skills.soft %}
+                        <li>{{ skill }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Projects</h2>
+            {% for project in projects %}
+            <div class="project-item">
+                <h3>{{ project.title }}</h3>
+                <p>{{ project.description }}</p>
+            </div>
+            {% endfor %}
+        </section>
+    </div>
+</body>
+</html>

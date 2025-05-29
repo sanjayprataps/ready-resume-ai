@@ -24,14 +24,6 @@ import { useState } from "react";
 import { Mail, Upload, FileText, Download, Eye } from "lucide-react";
 import { toast } from "sonner";
 
-/**
- * CoverLetterWriter Component
- * 
- * Provides a user interface for generating personalized cover letters based on resume
- * and job details. Handles file upload, form input, and cover letter generation process.
- * 
- * @returns {JSX.Element} The cover letter writer page
- */
 const CoverLetterWriter = () => {
   // State management for form inputs and generation status
   const [resumeFile, setResumeFile] = useState<File | null>(null);

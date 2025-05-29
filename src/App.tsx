@@ -24,6 +24,7 @@ import ResumeUpload from "./pages/ResumeUpload";
 import ResumeOptimizer from "./pages/ResumeOptimizer";
 import ResumeGenerator from "./pages/ResumeGenerator";
 import CoverLetterWriter from "./pages/CoverLetterWriter";
+import PortfolioGenerator from "./pages/PortfolioGenerator";
 import NotFound from "./pages/NotFound";
 
 // Initialize React Query client
@@ -56,9 +57,9 @@ const App = () => (
           <Route path="/resume-optimizer" element={<ResumeOptimizer />} />
           <Route path="/resume-generator" element={<ResumeGenerator />} />
           <Route path="/cover-letter-writer" element={<CoverLetterWriter />} />
+          <Route path="/portfolio-generator" element={<PortfolioGenerator />} />
           
           {/* Placeholder routes for upcoming features */}
-          <Route path="/portfolio-builder" element={<ResumeUpload />} />
           <Route path="/portfolio-optimizer" element={<ResumeUpload />} />
           <Route path="/linkedin-optimizer" element={<ResumeUpload />} />
           <Route path="/career-coach" element={<ResumeUpload />} />

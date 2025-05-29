@@ -103,8 +103,12 @@ def format_input_for_prompt(form_data: ResumeData) -> str:
 
     # Format experience entries
     exp_blocks = []
-    for job in form_data.experience:
-        block = f"Position: {job.job_title}\nCompany: {job.company}\nPeriod: {job.start_date} - {job.end_date}\nLocation: {job.location}\n"
+    for i, job in enumerate(form_data.experience, 1):
+        block = f"Experience {i}:\n"
+        block += f"Position: {job.job_title}\n"
+        block += f"Company: {job.company}\n"
+        block += f"Period: {job.start_date} - {job.end_date}\n"
+        block += f"Location: {job.location}\n"
         block += f"Description: {job.description}\n"
         if job.achievements:
             block += "Achievements:\n"
@@ -114,16 +118,22 @@ def format_input_for_prompt(form_data: ResumeData) -> str:
 
     # Format education entries
     edu_blocks = []
-    for edu in form_data.education:
-        block = f"Degree: {edu.degree}\nInstitution: {edu.institution}\nGraduation: {edu.graduation_date}\nLocation: {edu.location}"
+    for i, edu in enumerate(form_data.education, 1):
+        block = f"Education {i}:\n"
+        block += f"Degree: {edu.degree}\n"
+        block += f"Institution: {edu.institution}\n"
+        block += f"Graduation: {edu.graduation_date}\n"
+        block += f"Location: {edu.location}"
         if edu.gpa:
             block += f"\nGPA: {edu.gpa}"
         edu_blocks.append(block)
 
     # Format project entries
     project_blocks = []
-    for p in form_data.projects:
-        block = f"Title: {p.title}\nDescription: {p.description}"
+    for i, p in enumerate(form_data.projects, 1):
+        block = f"Project {i}:\n"
+        block += f"Title: {p.title}\n"
+        block += f"Description: {p.description}"
         project_blocks.append(block)
 
     # Format skills

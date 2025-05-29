@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, User, Book, Calendar, Mail, Mic, Search, Award, Link as LinkIcon, BrainCircuit, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,7 +18,7 @@ const featuresData = {
     },
     {
       name: "AI Resume Generator", 
-      description: "Don't have a Resume or CV?, No problem! Import your LinkedIn profile to generate a resume OR Generate a resume by answering guided questions.",
+      description: "Don't have a Resume or CV?, No problem! Generate a resume by answering guided questions.",
       icon: "FileText",
       cta: "Generate Resume",
       route: "/resume-generator"
@@ -34,26 +33,11 @@ const featuresData = {
     // Row 2
     {
       name: "AI Portfolio Builder",
-      description: "Accepts PDF/Word résumé or guided Q&A to generate a responsive, host-ready site (custom subdomain + exportable HTML)",
+      description: "Accepts PDF/Word resume or guided Q&A to generate a responsive, host-ready site (custom subdomain + exportable HTML)",
       icon: "User",
       cta: "Build Portfolio",
-      route: "/portfolio-builder"
+      route: "/portfolio-generator"
     },
-    {
-      name: "Portfolio Optimizer",
-      description: "Real-time score, keyword gap analysis vs. target job description, and auto-rewrite suggestions",
-      icon: "Target",
-      cta: "Optimize Portfolio",
-      route: "/portfolio-optimizer"
-    },
-    {
-      name: "LinkedIn Optimizer",
-      description: "Optimize your LinkedIn profile for maximum visibility.",
-      icon: "Link",
-      cta: "Optimize Profile",
-      route: "/linkedin-optimizer"
-    },
-    // Row 3
     {
       name: "AI Career Coach",
       description: "Get personalized career coaching and skill gap analysis.",
@@ -62,18 +46,20 @@ const featuresData = {
       route: "/career-coach"
     },
     {
-      name: "AI Job Search and Tracker",
-      description: "Get personalized right-fit Job recommendations",
-      icon: "Calendar",
-      cta: "Search Jobs",
-      route: "/job-search-tracker"
-    },
-    {
       name: "AI Interview Coach",
       description: "Get role specific interview practice with analysis and improvement tips.",
       icon: "Mic",
       cta: "Practice Interview",
       route: "/interview-coach"
+    },
+    // Row 3 - Full width job search
+    {
+      name: "AI Job Search and Tracker",
+      description: "Get personalized right-fit Job recommendations with advanced matching algorithms and application tracking.",
+      icon: "Calendar",
+      cta: "Search Jobs",
+      route: "/job-search-tracker",
+      fullWidth: true
     }
   ]
 };
@@ -86,15 +72,12 @@ const iconMap: Record<string, React.ReactNode> = {
   Calendar: <Calendar className="h-6 w-6 text-portfolioai-accent" />,
   Mail: <Mail className="h-6 w-6 text-portfolioai-accent" />,
   Mic: <Mic className="h-6 w-6 text-portfolioai-accent" />,
-  Award: <Award className="h-6 w-6 text-portfolioai-accent" />,
-  Link: <LinkIcon className="h-6 w-6 text-portfolioai-accent" />,
-  BrainCircuit: <BrainCircuit className="h-6 w-6 text-portfolioai-accent" />,
-  Target: <Target className="h-6 w-6 text-portfolioai-accent" />
+  BrainCircuit: <BrainCircuit className="h-6 w-6 text-portfolioai-accent" />
 };
 
 const FeatureCard = ({ feature }: { feature: any }) => {
   return (
-    <Card className="border border-gray-200 transition-all hover:shadow-md h-full flex flex-col">
+    <Card className={`border border-gray-200 transition-all hover:shadow-md h-full flex flex-col ${feature.fullWidth ? 'col-span-full' : ''}`}>
       <CardHeader className="pb-4">
         <div className="mb-3">{iconMap[feature.icon] || <FileText className="h-6 w-6 text-portfolioai-accent" />}</div>
         <CardTitle className="text-lg font-semibold text-portfolioai-primary">{feature.name}</CardTitle>
