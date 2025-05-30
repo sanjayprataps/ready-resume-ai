@@ -33,6 +33,27 @@ def extract_text_from_pdf(pdf_file) -> str:
         print(f"Error in extract_text_from_pdf: {str(e)}")
         raise HTTPException(status_code=400, detail=f"Error processing PDF: {str(e)}")
 
+def clean_markdown(text: str) -> str:
+    """
+    Remove Markdown formatting symbols from text.
+    
+    Args:
+        text (str): Text containing Markdown symbols
+        
+    Returns:
+        str: Cleaned text without Markdown symbols
+    """
+    # Remove bold/italic markers
+    text = text.replace('**', '')
+    text = text.replace('*', '')
+    # Remove headers
+    text = text.replace('##', '')
+    # Remove trailing # symbols
+    text = text.rstrip('#')
+    # Remove extra newlines and whitespace
+    text = '\n'.join(line.strip() for line in text.split('\n') if line.strip())
+    return text.strip()
+
 def analyze_resume(resume_text: str, job_desc: str) -> dict:
     """
     Analyze a resume against a job description using the Groq LLM API.
@@ -51,6 +72,8 @@ def analyze_resume(resume_text: str, job_desc: str) -> dict:
         print("\n" + "="*50)
         print("STARTING RESUME ANALYSIS")
         print("="*50)
+        print(f"Resume text length: {len(resume_text)}")
+        print(f"Job description length: {len(job_desc)}")
         
         # Initialize Groq client
         client = groq.Groq(
@@ -126,15 +149,57 @@ def analyze_resume(resume_text: str, job_desc: str) -> dict:
                 "suggestions": ""
             }
             
-            # Split the response into sections
-            if "1. Key Strengths:" in response_text:
-                strengths_section = response_text.split("1. Key Strengths:")[1]
-                if "2. Areas for Improvement:" in strengths_section:
-                    sections["strengths"] = strengths_section.split("2. Areas for Improvement:")[0].strip()
-                    weaknesses_section = strengths_section.split("2. Areas for Improvement:")[1]
-                    if "3. Suggestions:" in weaknesses_section:
-                        sections["weaknesses"] = weaknesses_section.split("3. Suggestions:")[0].strip()
-                        sections["suggestions"] = weaknesses_section.split("3. Suggestions:")[1].strip()
+            # Try different section header formats
+            strength_headers = ["1. Key Strengths:", "### Key Strengths:", "Key Strengths:"]
+            weakness_headers = ["2. Areas for Improvement:", "### Areas for Improvement:", "Areas for Improvement:"]
+            suggestion_headers = ["3. Suggestions:", "### Suggestions:", "Suggestions:"]
+            
+            # Find the first occurrence of any strength header
+            strength_start = -1
+            for header in strength_headers:
+                if header in response_text:
+                    strength_start = response_text.find(header) + len(header)
+                    break
+            
+            if strength_start != -1:
+                # Get the text after the strength header
+                remaining_text = response_text[strength_start:]
+                
+                # Find the first occurrence of any weakness header
+                weakness_start = -1
+                for header in weakness_headers:
+                    if header in remaining_text:
+                        weakness_start = remaining_text.find(header)
+                        break
+                
+                if weakness_start != -1:
+                    # Extract strengths section
+                    sections["strengths"] = clean_markdown(remaining_text[:weakness_start].strip())
+                    
+                    # Get the text after the weakness header
+                    remaining_text = remaining_text[weakness_start:]
+                    for header in weakness_headers:
+                        if header in remaining_text:
+                            remaining_text = remaining_text[remaining_text.find(header) + len(header):]
+                            break
+                    
+                    # Find the first occurrence of any suggestion header
+                    suggestion_start = -1
+                    for header in suggestion_headers:
+                        if header in remaining_text:
+                            suggestion_start = remaining_text.find(header)
+                            break
+                    
+                    if suggestion_start != -1:
+                        # Extract weaknesses section
+                        sections["weaknesses"] = clean_markdown(remaining_text[:suggestion_start].strip())
+                        
+                        # Extract suggestions section
+                        remaining_text = remaining_text[suggestion_start:]
+                        for header in suggestion_headers:
+                            if header in remaining_text:
+                                sections["suggestions"] = clean_markdown(remaining_text[remaining_text.find(header) + len(header):].strip())
+                                break
             
             # Ensure all sections have content
             if not sections["strengths"]:
@@ -143,6 +208,11 @@ def analyze_resume(resume_text: str, job_desc: str) -> dict:
                 sections["weaknesses"] = "No areas for improvement identified"
             if not sections["suggestions"]:
                 sections["suggestions"] = "No specific suggestions provided"
+            
+            print("\n=== Final Sections ===")
+            print("Strengths:", sections["strengths"])
+            print("Weaknesses:", sections["weaknesses"])
+            print("Suggestions:", sections["suggestions"])
             
             return sections
             

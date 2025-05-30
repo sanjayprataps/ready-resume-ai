@@ -72,12 +72,16 @@ async def analyze_resume_endpoint(
         # Get analysis from API
         try:
             analysis = analyze_resume(resume_text, job_description)
-            return JSONResponse(
-                content={
-                    "status": "success",
-                    "analysis": analysis
-                }
-            )
+            print("\n=== Final Response ===")
+            print("Analysis:", analysis)
+            
+            response = {
+                "status": "success",
+                "analysis": analysis
+            }
+            print("Response:", response)
+            
+            return JSONResponse(content=response)
         except Exception as e:
             print(f"Error during analysis: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
