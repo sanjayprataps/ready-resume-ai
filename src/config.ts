@@ -4,7 +4,7 @@ const isLovablePreview = window.location.hostname.includes('lovable.app');
 export const API_BASE_URL = isLovablePreview
   ? 'http://localhost:8000'  // For Lovable preview, we'll use localhost since the backend isn't deployed yet
   : process.env.NODE_ENV === 'production'
-    ? 'https://resume-ai-backend.onrender.com'  // Your Render backend URL
+    ? 'https://ready-resume-ai.onrender.com'  // Your Render backend URL
     : 'http://localhost:8000';
 
 // API Endpoints
