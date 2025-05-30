@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useRef } from "react";
-import { FileText, Link, User, Download, Plus, Trash2 } from "lucide-react";
+import { FileText, Link, User, Download, Plus, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
@@ -110,6 +110,7 @@ interface GeneratedResume {
     name: string;
     description: string;
   }>;
+  pdfUrl?: string;
 }
 
 const ResumeGenerator = () => {
@@ -257,61 +258,56 @@ const ResumeGenerator = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Accept": "application/json"  // Request JSON response for preview
         },
         body: JSON.stringify(resumeData),
       });
 
-      const responseText = await response.text();
-      console.log("Raw API response:", responseText);  // Debug log
-
       if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}: ${responseText}`);
+        const errorText = await response.text();
+        throw new Error(`API request failed with status ${response.status}: ${errorText}`);
       }
 
-      let data;
-      try {
-        data = JSON.parse(responseText);
-        console.log("Parsed API response:", data);  // Debug log
-      } catch (e) {
-        console.error("Failed to parse API response as JSON:", responseText);
-        throw new Error("Invalid response from server");
-      }
-
-      if (data.status === "success") {
-        // Validate the resume data structure
-        if (!data.resume) {
-          throw new Error("No resume data in response");
-        }
-        
-        // Log the structure of the resume data
-        console.log("Resume data structure:", {
-          hasName: !!data.resume.name,
-          hasSummary: !!data.resume.summary,
-          hasExperience: Array.isArray(data.resume.experience),
-          hasEducation: Array.isArray(data.resume.education),
-          hasSkills: !!data.resume.skills,
-          hasProjects: Array.isArray(data.resume.projects),
-        });
-
-        // Ensure skills arrays exist
-        if (!data.resume.skills) {
-          data.resume.skills = { technical: [], soft: [] };
-        }
-        if (!Array.isArray(data.resume.skills.technical)) {
-          data.resume.skills.technical = [];
-        }
-        if (!Array.isArray(data.resume.skills.soft)) {
-          data.resume.skills.soft = [];
-        }
-
-        toast.success("Resume generated successfully!");
-        console.log("Generated resume data:", data.resume);
-        console.log("Education data:", JSON.stringify(data.resume.education, null, 2));
-        setGeneratedResume(data.resume);
-        setShowResumeModal(true);
+      // Check if the response is a PDF
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/pdf")) {
+        // Handle PDF download
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${resumeData.personal_info.full_name.toLowerCase().replace(/\s+/g, '-')}-resume.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        toast.success("Resume generated and downloaded successfully!");
       } else {
-        toast.error(data.detail || "Failed to generate resume");
-        console.error("API returned error:", data);
+        // Handle JSON response (for preview)
+        const data = await response.json();
+        if (data.status === "success") {
+          // Convert base64 PDF to blob for preview
+          if (data.pdf) {
+            const pdfBytes = atob(data.pdf);
+            const pdfArray = new Uint8Array(pdfBytes.length);
+            for (let i = 0; i < pdfBytes.length; i++) {
+              pdfArray[i] = pdfBytes.charCodeAt(i);
+            }
+            const pdfBlob = new Blob([pdfArray], { type: 'application/pdf' });
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            
+            // Store the PDF URL for later use
+            setGeneratedResume({
+              ...data.resume,
+              pdfUrl
+            });
+          } else {
+            setGeneratedResume(data.resume);
+          }
+          toast.success("Resume generated successfully!");
+        } else {
+          throw new Error(data.detail || "Failed to generate resume");
+        }
       }
     } catch (error) {
       console.error("Error details:", error);
@@ -552,6 +548,50 @@ const ResumeGenerator = () => {
 
     // Save the PDF
     doc.save(`${generatedResume.name.toLowerCase().replace(/\s+/g, '-')}-resume.pdf`);
+  };
+
+  const handleDownloadPDF = async () => {
+    try {
+      if (generatedResume?.pdfUrl) {
+        // If we already have the PDF URL, use it
+        const link = document.createElement("a");
+        link.href = generatedResume.pdfUrl;
+        link.download = `${resumeData.personal_info.full_name.toLowerCase().replace(/\s+/g, '-')}-resume.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success("Resume downloaded successfully!");
+      } else {
+        // Otherwise, request a new PDF
+        const response = await fetch(API_ENDPOINTS.GENERATE_RESUME, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/pdf"  // Request PDF response
+          },
+          body: JSON.stringify(resumeData),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`API request failed with status ${response.status}: ${errorText}`);
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${resumeData.personal_info.full_name.toLowerCase().replace(/\s+/g, '-')}-resume.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        toast.success("Resume downloaded successfully!");
+      }
+    } catch (error) {
+      console.error("Error downloading PDF:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to download resume. Please try again.");
+    }
   };
 
   return (
@@ -895,13 +935,55 @@ const ResumeGenerator = () => {
                       ))}
                     </div>
 
-                    <Button 
-                      onClick={() => handleGenerate("guided")}
-                      disabled={isGenerating}
-                      className="w-full bg-portfolioai-primary hover:bg-portfolioai-secondary"
-                    >
-                      {isGenerating ? "Generating..." : "Generate Resume"}
-                    </Button>
+                    {/* Generate button */}
+                    <div className="text-center mt-8">
+                      <Button 
+                        onClick={() => handleGenerate("guided")}
+                        disabled={isGenerating}
+                        className="bg-portfolioai-primary hover:bg-portfolioai-secondary px-8 py-3"
+                      >
+                        {isGenerating ? (
+                          <>
+                            <Loader2 className="animate-spin mr-2 h-4 w-4" />
+                            Generating...
+                          </>
+                        ) : (
+                          'Generate Resume'
+                        )}
+                      </Button>
+                    </div>
+
+                    {/* Resume Preview */}
+                    {generatedResume && (
+                      <Card className="mt-8">
+                        <CardHeader>
+                          <CardTitle>Generated Resume</CardTitle>
+                          <CardDescription>Review your generated resume below</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-6">
+                            {/* PDF Preview */}
+                            {generatedResume.pdfUrl && (
+                              <div className="border rounded-lg overflow-hidden h-[800px]">
+                                <iframe
+                                  src={generatedResume.pdfUrl}
+                                  className="w-full h-full"
+                                  title="Resume Preview"
+                                />
+                              </div>
+                            )}
+
+                            {/* Download Button */}
+                            <div className="flex justify-center">
+                              <Button onClick={handleDownloadPDF}>
+                                <Download className="mr-2 h-4 w-4" />
+                                Download PDF
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
                   </div>
                 </TabsContent>
               </Tabs>
@@ -909,99 +991,6 @@ const ResumeGenerator = () => {
           </Card>
         </div>
       </div>
-
-      {generatedResume && (
-        <Dialog open={showResumeModal} onOpenChange={setShowResumeModal}>
-          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Generated Resume</DialogTitle>
-              <DialogDescription>
-                Review your generated resume below. You can download it as a PDF file.
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="space-y-6">
-              <div className="text-center">
-                <h2 className="text-2xl font-bold">{generatedResume.name}</h2>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Summary</h3>
-                <p className="text-gray-700">{generatedResume.summary}</p>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Experience</h3>
-                {generatedResume.experience.map((exp, index) => (
-                  <div key={index} className="mb-4">
-                    <h4 className="font-medium">{exp.position} at {exp.company}</h4>
-                    <p className="text-sm text-gray-600">{exp.location} | {exp.dates}</p>
-                    <ul className="list-disc list-inside mt-2">
-                      {exp.description.map((desc, i) => (
-                        <li key={i} className="text-gray-700">{desc}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Education</h3>
-                {generatedResume.education.map((edu, index) => (
-                  <div key={index} className="mb-2">
-                    <h4 className="font-medium">{edu.degree}</h4>
-                    <p className="text-sm text-gray-600">{edu.institution}</p>
-                    <p className="text-sm text-gray-600">{edu.location} | {edu.dates}</p>
-                    {edu.gpa && <p className="text-sm text-gray-600">GPA: {edu.gpa}</p>}
-                  </div>
-                ))}
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Skills</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="font-medium mb-1">Technical Skills</h4>
-                    <p className="text-gray-700">
-                      {Array.isArray(generatedResume.skills?.technical) 
-                        ? generatedResume.skills.technical.join(', ')
-                        : generatedResume.skills?.technical || 'No technical skills listed'}
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="font-medium mb-1">Soft Skills</h4>
-                    <p className="text-gray-700">
-                      {Array.isArray(generatedResume.skills?.soft)
-                        ? generatedResume.skills.soft.join(', ')
-                        : generatedResume.skills?.soft || 'No soft skills listed'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Projects</h3>
-                {generatedResume.projects.map((proj, index) => (
-                  <div key={index} className="mb-4">
-                    <h4 className="font-medium">{proj.name}</h4>
-                    <p className="text-gray-700">{proj.description}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex justify-end">
-                <Button 
-                  onClick={generatePDF}
-                  className="flex items-center gap-2"
-                >
-                  <Download className="h-4 w-4" />
-                  Download PDF Resume
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
     </MainLayout>
   );
 };

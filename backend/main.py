@@ -6,7 +6,7 @@ It imports and uses the core logic from resume_optimizer.py, resume_generator.py
 """
 
 import os
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from dotenv import load_dotenv
@@ -99,19 +99,43 @@ async def analyze_resume_endpoint(
         raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
 
 @app.post("/generate-resume")
-async def generate_resume_endpoint(resume_data: ResumeData):
+async def generate_resume_endpoint(resume_data: ResumeData, accept: str = Header(default="application/pdf")):
     """
     Generate a professional resume using the provided data.
     
     - **resume_data**: The structured resume data
+    - **accept**: The Accept header to determine response format (application/pdf or application/json)
     """
     try:
+        print("\n=== Resume Generation Request ===")
+        print(f"Accept header: {accept}")
+        print("Resume data:", resume_data.dict())
+        
         result = generate_resume(resume_data)
+        print("\n=== Generation Result ===")
+        print(f"Status: {result['status']}")
+        
+        if result["status"] == "success":
+            if "application/json" in accept:
+                print("Returning JSON response")
+                return JSONResponse(content=result)
+            else:
+                print("Returning PDF response")
+                return StreamingResponse(
+                    BytesIO(result["pdf"]),
+                    media_type="application/pdf",
+                    headers={
+                        "Content-Disposition": f"attachment; filename={result['resume']['name'].lower().replace(' ', '-')}-resume.pdf"
+                    }
+                )
         return result
     except ValueError as ve:
-        raise HTTPException(status_code=500, detail=str(ve))
+        print(f"\n=== Validation Error ===")
+        print(f"Error: {str(ve)}")
+        raise HTTPException(status_code=400, detail=str(ve))
     except Exception as e:
-        print(f"Error in generate_resume_endpoint: {str(e)}")
+        print(f"\n=== Unexpected Error ===")
+        print(f"Error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to generate resume: {str(e)}")
 
 @app.post("/api/generate-cover-letter")

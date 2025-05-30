@@ -9,6 +9,11 @@ import os
 import groq
 from typing import Dict, List, Optional
 from pydantic import BaseModel
+from jinja2 import Environment, FileSystemLoader
+import json
+import pdfkit
+import tempfile
+import base64
 
 # Pydantic models for data structure
 class Experience(BaseModel):
@@ -55,16 +60,14 @@ class ResumeData(BaseModel):
 
 # Template for the prompt sent to Groq LLM
 GROQ_PROMPT_TEMPLATE = """
-You are a resume generation expert. Based on the user's input below, create a structured and professional resume. 
+You are a resume generation expert. Based on the user's input below, create a structured and professional resume.
 Use action verbs, quantify achievements where possible, and format in standard US resume format.
 
 ## Personal Information:
 Name: {name}
 Email: {email}
 Phone: {phone}
-Location: {location}
-LinkedIn: {linkedin}
-Website: {website}
+Location: {location}{linkedin}{website}
 Summary: {summary}
 
 ## Experience:
@@ -82,9 +85,27 @@ Summary: {summary}
 ## Projects:
 {projects}
 
+IMPORTANT: The input contains multiple entries for experience, education, and projects. Each entry is numbered and should be processed as a separate item in the output JSON arrays.
 Output a JSON with the following keys: name, summary, experience, education, skills, and projects.
 Use bullet points where needed. Return only valid JSON.
 """
+
+# Initialize Jinja2 environment
+template_dir = os.path.join(os.path.dirname(__file__), 'templates')
+env = Environment(loader=FileSystemLoader(template_dir))
+
+def generate_resume_html(resume_data: Dict) -> str:
+    """
+    Generate HTML resume using Jinja2 template.
+    
+    Args:
+        resume_data (Dict): The structured resume data
+        
+    Returns:
+        str: Generated HTML resume
+    """
+    template = env.get_template('resume_template.html')
+    return template.render(resume=resume_data)
 
 def format_input_for_prompt(form_data: ResumeData) -> str:
     """
@@ -101,25 +122,33 @@ def format_input_for_prompt(form_data: ResumeData) -> str:
     linkedin = f"\nLinkedIn: {personal_info.linkedin}" if personal_info.linkedin else ""
     website = f"\nWebsite: {personal_info.website}" if personal_info.website else ""
 
-    # Format experience entries
+    # Format experience entries with clear numbering and structure
     exp_blocks = []
     for i, job in enumerate(form_data.experience, 1):
-        block = f"Experience {i}:\n"
+        block = f"Experience Entry {i}:\n"
         block += f"Position: {job.job_title}\n"
         block += f"Company: {job.company}\n"
         block += f"Period: {job.start_date} - {job.end_date}\n"
         block += f"Location: {job.location}\n"
-        block += f"Description: {job.description}\n"
+        block += "Description:\n"
+        # Split description into bullet points if it contains them
+        if "●" in job.description:
+            desc_points = [d.strip() for d in job.description.split("●") if d.strip()]
+        else:
+            desc_points = [job.description]
+        for point in desc_points:
+            block += f"- {point.strip()}\n"
         if job.achievements:
             block += "Achievements:\n"
             for a in job.achievements:
-                block += f"- {a}\n"
+                if a.strip():  # Only add non-empty achievements
+                    block += f"- {a.strip()}\n"
         exp_blocks.append(block)
 
-    # Format education entries
+    # Format education entries with clear numbering and structure
     edu_blocks = []
     for i, edu in enumerate(form_data.education, 1):
-        block = f"Education {i}:\n"
+        block = f"Education Entry {i}:\n"
         block += f"Degree: {edu.degree}\n"
         block += f"Institution: {edu.institution}\n"
         block += f"Graduation: {edu.graduation_date}\n"
@@ -128,19 +157,19 @@ def format_input_for_prompt(form_data: ResumeData) -> str:
             block += f"\nGPA: {edu.gpa}"
         edu_blocks.append(block)
 
-    # Format project entries
+    # Format project entries with clear numbering and structure
     project_blocks = []
     for i, p in enumerate(form_data.projects, 1):
-        block = f"Project {i}:\n"
+        block = f"Project Entry {i}:\n"
         block += f"Title: {p.title}\n"
         block += f"Description: {p.description}"
         project_blocks.append(block)
 
-    # Format skills
+    # Format skills with clear separation
     technical_skills = [skill.strip() for skill in form_data.technical_skills.split(',') if skill.strip()]
     soft_skills = [skill.strip() for skill in form_data.soft_skills.split(',') if skill.strip()]
 
-    # Return formatted prompt
+    # Return formatted prompt with clear section headers
     return GROQ_PROMPT_TEMPLATE.format(
         name=personal_info.full_name,
         email=personal_info.email,
@@ -164,107 +193,190 @@ def generate_resume(resume_data: ResumeData):
         resume_data (ResumeData): The structured resume data from the user
         
     Returns:
-        dict: Generated resume data
+        dict: Generated resume data and PDF
         
     Raises:
         Exception: If there's an error in resume generation
     """
     try:
+        print("\n=== Starting Resume Generation ===")
+        print("Input data:", resume_data.dict())
+        
         # Initialize Groq client
         client = groq.Groq(
             api_key=os.getenv("GROQ_API_KEY")
         )
+        print("Groq client initialized")
 
         # Format and send prompt to Groq
         prompt = format_input_for_prompt(resume_data)
-        print("Sending prompt to Groq:", prompt)  # Debug log
+        print("\n=== Sending Prompt to Groq ===")
+        print(prompt)
         
-        try:
-            # Get completion from Groq
-            completion = client.chat.completions.create(
-                model="deepseek-r1-distill-llama-70b",
-                messages=[
-                    {
-                        "role": "system", 
-                        "content": """You are a resume writing assistant. Your task is to generate a professional resume in JSON format.
-                        Always respond with a valid JSON object containing these exact keys: name, summary, experience, education, skills, and projects.
+        max_retries = 3
+        retry_count = 0
+        
+        while retry_count < max_retries:
+            try:
+                # Get completion from Groq
+                completion = client.chat.completions.create(
+                    model="meta-llama/llama-4-maverick-17b-128e-instruct",
+                    messages=[
+                        {
+                            "role": "system", 
+                            "content": """You are a resume writing assistant. Your task is to generate a professional resume in JSON format.
+                            CRITICAL: You must ALWAYS return a valid JSON object with NO trailing commas, NO line breaks within strings, and NO markdown formatting.
+                            
+                            Required JSON structure:
+                            {
+                                "name": string,
+                                "email": string,
+                                "phone": string,
+                                "location": string,
+                                "linkedin": string,
+                                "website": string,
+                                "summary": string,
+                                "experience": [
+                                    {
+                                        "company": string,
+                                        "position": string,
+                                        "location": string,
+                                        "dates": string,
+                                        "description": string[]
+                                    }
+                                ],
+                                "education": [
+                                    {
+                                        "degree": string,
+                                        "institution": string,
+                                        "location": string,
+                                        "dates": string,
+                                        "gpa": string
+                                    }
+                                ],
+                                "skills": {
+                                    "technical": string[],
+                                    "soft": string[]
+                                },
+                                "projects": [
+                                    {
+                                        "name": string,
+                                        "description": string
+                                    }
+                                ]
+                            }"""
+                        },
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.7,
+                    max_tokens=1000
+                )
+                
+                # Process the response
+                output_text = completion.choices[0].message.content.strip()
+                print("\n=== Raw Response from Groq ===")
+                print(output_text)
+                
+                if not output_text:
+                    raise ValueError("Empty response received from Groq API")
+                
+                # Clean the response
+                cleaned_text = output_text
+                if "```json" in cleaned_text:
+                    cleaned_text = cleaned_text.split("```json")[1].split("```")[0].strip()
+                elif "```" in cleaned_text:
+                    cleaned_text = cleaned_text.split("```")[1].split("```")[0].strip()
+                
+                # Extract only the JSON object
+                start_idx = cleaned_text.find("{")
+                end_idx = cleaned_text.rfind("}")
+                if start_idx == -1 or end_idx == -1:
+                    raise ValueError("Invalid JSON structure in response")
+                
+                cleaned_text = cleaned_text[start_idx:end_idx + 1]
+                print("\n=== Cleaned Response ===")
+                print(cleaned_text)
+                
+                try:
+                    # Parse and validate the JSON response
+                    resume_json = json.loads(cleaned_text)
+                    print("\n=== Parsed JSON ===")
+                    print(json.dumps(resume_json, indent=2))
+                    
+                    # Validate required fields
+                    required_fields = ["name", "summary", "experience", "education", "skills", "projects"]
+                    missing_fields = [field for field in required_fields if field not in resume_json]
+                    
+                    if missing_fields:
+                        raise ValueError(f"Missing required fields in response: {', '.join(missing_fields)}")
+                    
+                    # Generate HTML resume
+                    print("\n=== Generating HTML ===")
+                    html_resume = generate_resume_html(resume_json)
+                    
+                    # Convert HTML to PDF using pdfkit
+                    print("\n=== Converting to PDF ===")
+                    import time
+                    import tempfile
+                    import shutil
+                    
+                    # Create a temporary directory for PDF generation
+                    with tempfile.TemporaryDirectory() as temp_dir:
+                        temp_pdf_path = os.path.join(temp_dir, 'resume.pdf')
                         
-                        For experience, each entry should have: company, position, location, dates, and description (as an array of bullet points).
-                        For education, each entry should have: degree, institution, location, dates (use graduation_date as the dates value), and gpa (if provided).
-                        For projects, each entry should have: name and description.
-                        
-                        For skills, use this exact format:
-                        "skills": {
-                            "technical": ["skill1", "skill2", "skill3"],
-                            "soft": ["skill1", "skill2", "skill3"]
+                        # Configure pdfkit options
+                        options = {
+                            'page-size': 'A4',
+                            'margin-top': '20mm',
+                            'margin-right': '20mm',
+                            'margin-bottom': '20mm',
+                            'margin-left': '20mm',
+                            'encoding': 'UTF-8',
+                            'no-outline': None
                         }
                         
-                        Make sure to:
-                        1. Split technical and soft skills into separate arrays
-                        2. Convert comma-separated skills into array items
-                        3. Remove any empty or whitespace-only skills
-                        4. Preserve all skills exactly as provided in the input
-                        
-                        Do not include any text before or after the JSON object."""
-                    },
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.7,
-                max_tokens=1000
-            )
-            
-            # Process the response
-            output_text = completion.choices[0].message.content.strip()
-            print("Raw response from Groq:", output_text)  # Debug log
-            
-            if not output_text:
-                raise ValueError("Empty response received from Groq API")
-            
-            # Clean the response if it contains markdown code blocks
-            if "```json" in output_text:
-                output_text = output_text.split("```json")[1].split("```")[0].strip()
-            elif "```" in output_text:
-                output_text = output_text.split("```")[1].split("```")[0].strip()
-            
-            print("Cleaned response:", output_text)  # Debug log
-            
-            try:
-                # Parse and validate the JSON response
-                import json
-                resume_data = json.loads(output_text)
+                        try:
+                            # Convert HTML to PDF
+                            pdfkit.from_string(html_resume, temp_pdf_path, options=options)
+                            
+                            # Read the generated PDF and encode it as base64
+                            with open(temp_pdf_path, 'rb') as pdf_file:
+                                pdf_content = pdf_file.read()
+                                pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
+                            
+                            print("\n=== Resume Generation Complete ===")
+                            return {
+                                "status": "success",
+                                "resume": resume_json,
+                                "html": html_resume,
+                                "pdf": pdf_base64  # Return base64 encoded PDF
+                            }
+                            
+                        except Exception as e:
+                            print(f"\n=== PDF Generation Error ===")
+                            print(f"Error: {str(e)}")
+                            if retry_count < max_retries - 1:
+                                time.sleep(1)  # Add a small delay between retries
+                                retry_count += 1
+                                continue
+                            raise ValueError(f"Failed to generate PDF after {max_retries} attempts: {str(e)}")
+                    
+                except json.JSONDecodeError as e:
+                    print(f"\n=== JSON Parse Error ===")
+                    print(f"Error: {str(e)}")
+                    print(f"Problematic text: {cleaned_text[max(0, e.pos-50):min(len(cleaned_text), e.pos+50)]}")
+                    raise ValueError(f"Failed to parse AI response as JSON: {str(e)}")
+                    
+            except Exception as e:
+                print(f"\n=== Attempt {retry_count + 1} Failed ===")
+                print(f"Error: {str(e)}")
+                retry_count += 1
+                if retry_count == max_retries:
+                    raise ValueError(f"All {max_retries} attempts failed to generate valid JSON: {str(e)}")
+                time.sleep(1)  # Add a small delay between retries
+                continue
                 
-                # Debug log for education data
-                print("Education data in response:", json.dumps(resume_data.get('education', []), indent=2))
-                
-                # Validate required fields
-                required_fields = ["name", "summary", "experience", "education", "skills", "projects"]
-                missing_fields = [field for field in required_fields if field not in resume_data]
-                
-                if missing_fields:
-                    raise ValueError(f"Missing required fields in response: {', '.join(missing_fields)}")
-                
-                # Validate education data structure
-                for edu in resume_data.get('education', []):
-                    if 'dates' not in edu:
-                        print(f"Warning: Missing dates in education entry: {edu}")
-                        # Use graduation_date if available
-                        if 'graduation_date' in edu:
-                            edu['dates'] = edu['graduation_date']
-                        else:
-                            edu['dates'] = "Not specified"
-                
-                return {
-                    "status": "success",
-                    "resume": resume_data
-                }
-            except json.JSONDecodeError as e:
-                print(f"JSON parsing error. Response text: {output_text}")
-                raise ValueError(f"Failed to parse AI response as JSON: {str(e)}")
-                
-        except Exception as e:
-            print(f"Groq API error: {str(e)}")
-            raise ValueError(f"Groq API error: {str(e)}")
-            
     except Exception as e:
-        print(f"Error in generate_resume: {str(e)}")
+        print(f"\n=== Resume Generation Error ===")
+        print(f"Error: {str(e)}")
         raise ValueError(f"Failed to generate resume: {str(e)}")
