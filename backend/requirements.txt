@@ -9,3 +9,4 @@ pydantic
 jinja2
 python-docx
 reportlab
+pdfkit
