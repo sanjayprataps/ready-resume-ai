@@ -17,6 +17,7 @@ from resume_optimizer import extract_text_from_pdf, analyze_resume
 from resume_generator import ResumeData, generate_resume
 from coverletter_writer import generate_cover_letter, CoverLetterInput
 from portfolio_generator import PortfolioData, generate_portfolio, extract_text_from_pdf as extract_portfolio_text
+from career_coach import analyze_career
 
 # Load environment variables from .env file
 load_dotenv()
@@ -313,6 +314,71 @@ async def generate_portfolio_endpoint(
         if resume:
             await resume.close()
 
+@app.post("/analyze-career")
+async def analyze_career_endpoint(resume: UploadFile = File(description="Upload your resume in PDF format")):
+    """
+    Analyze a resume and provide career guidance.
+    
+    - **resume**: Upload your resume in PDF format
+    """
+    try:
+        print(f"\n=== Career Analysis Request Received ===")
+        print(f"Received resume file: {resume.filename}, content type: {resume.content_type}")
+        
+        # Validate file type
+        if not resume.filename.lower().endswith('.pdf'):
+            print("Invalid file type:", resume.filename)
+            raise HTTPException(status_code=400, detail="Only PDF files are supported")
+        
+        # Read file content
+        try:
+            print("\n=== Reading File Content ===")
+            file_content = await resume.read()
+            print(f"File size: {len(file_content)} bytes")
+            
+            if len(file_content) == 0:
+                print("Empty file received")
+                raise HTTPException(status_code=400, detail="Empty file received")
+            
+            # Create a BytesIO object for text extraction
+            from io import BytesIO
+            resume.file = BytesIO(file_content)
+            
+            print("\n=== Extracting Text from PDF ===")
+            resume_text = extract_text_from_pdf(resume.file)
+            print(f"Extracted text length: {len(resume_text)}")
+            
+            if not resume_text.strip():
+                print("No text extracted from PDF")
+                raise HTTPException(status_code=400, detail="Could not extract text from the PDF file")
+                
+        except Exception as e:
+            print(f"\n=== PDF Processing Error ===")
+            print(f"Error: {str(e)}")
+            raise HTTPException(status_code=400, detail=f"Error processing PDF file: {str(e)}")
+        
+        # Get career analysis
+        try:
+            print("\n=== Starting Career Analysis ===")
+            result = analyze_career(resume_text)
+            print("\n=== Career Analysis Complete ===")
+            print("Analysis status:", result.get("status"))
+            
+            return JSONResponse(content=result)
+        except Exception as e:
+            print(f"\n=== Career Analysis Error ===")
+            print(f"Error: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        print(f"\n=== Unexpected Error ===")
+        print(f"Error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
+    finally:
+        print("\n=== Request Processing Complete ===")
+        await resume.close()
+
 @app.get("/")
 async def root():
     """Root endpoint that returns a welcome message and all available endpoints"""
@@ -331,3 +397,8 @@ async def root():
             "generate_portfolio": "Upload a resume PDF or provide portfolio data to generate a website"
         }
     }
+
+@app.get("/test-career-coach")
+async def test_career_coach():
+    """Test endpoint for career coach feature"""
+    return {"status": "success", "message": "Career coach endpoint is accessible"}

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Career Analysis Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        h2 {
+            color: #2c3e50;
+            margin-top: 30px;
+            border-left: 4px solid #3498db;
+            padding-left: 10px;
+        }
+        .section {
+            margin-bottom: 30px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .skill-list, .recommendation-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .skill-list li, .recommendation-list li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+        .skill-list li:before, .recommendation-list li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #3498db;
+        }
+        .career-path {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #e9ecef;
+            margin-bottom: 15px;
+        }
+        .career-path h3 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        .career-path p {
+            margin: 5px 0;
+        }
+        .career-path .label {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .section-header h2 {
+            margin: 0;
+            flex-grow: 1;
+        }
+        .section-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+            color: #3498db;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Career Analysis Report</h1>
+    
+    <div class="section">
+        <div class="section-header">
+            <h2>Career Strengths</h2>
+        </div>
+        <ul class="skill-list">
+            {% for strength in analysis.career_strengths %}
+            <li>{{ strength }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    
+    <div class="section">
+        <div class="section-header">
+            <h2>Areas for Improvement</h2>
+        </div>
+        <ul class="skill-list">
+            {% for area in analysis.areas_for_improvement %}
+            <li>{{ area }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    
+    <div class="section">
+        <div class="section-header">
+            <h2>Skill Gaps</h2>
+        </div>
+        <ul class="skill-list">
+            {% for gap in analysis.skill_gaps %}
+            <li>{{ gap }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    
+    <div class="section">
+        <div class="section-header">
+            <h2>Actionable Recommendations</h2>
+        </div>
+        <ul class="recommendation-list">
+            {% for rec in analysis.actionable_recommendations %}
+            <li>{{ rec }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    
+    <div class="section">
+        <div class="section-header">
+            <h2>Potential Career Paths</h2>
+        </div>
+        {% for path in analysis.potential_career_paths %}
+        <div class="career-path">
+            <h3>{{ path.role }}</h3>
+            <p><span class="label">Why it's a good fit:</span> {{ path.fit }}</p>
+            <p><span class="label">Next steps:</span> {{ path.next_steps }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html> 

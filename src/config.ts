@@ -12,5 +12,6 @@ export const API_ENDPOINTS = {
   GENERATE_RESUME: `${API_BASE_URL}/generate-resume`,
   ANALYZE_RESUME: `${API_BASE_URL}/analyze-resume`,
   GENERATE_PORTFOLIO: `${API_BASE_URL}/api/generate-portfolio`,
-  GENERATE_COVER_LETTER: `${API_BASE_URL}/api/generate-cover-letter`
+  GENERATE_COVER_LETTER: `${API_BASE_URL}/api/generate-cover-letter`,
+  ANALYZE_CAREER: `${API_BASE_URL}/analyze-career`
 }; 

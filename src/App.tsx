@@ -12,20 +12,21 @@
  */
 
 // Import necessary components and utilities
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 // Import page components
 import Index from "./pages/Index";
-import ResumeUpload from "./pages/ResumeUpload";
+import CareerCoach from "./pages/CareerCoach";
+import NotFound from "./pages/NotFound";
+import PlaceholderPage from "./pages/PlaceholderPage";
 import ResumeOptimizer from "./pages/ResumeOptimizer";
 import ResumeGenerator from "./pages/ResumeGenerator";
 import CoverLetterWriter from "./pages/CoverLetterWriter";
 import PortfolioGenerator from "./pages/PortfolioGenerator";
-import NotFound from "./pages/NotFound";
 
 // Initialize React Query client
 const queryClient = new QueryClient();
@@ -47,29 +48,28 @@ const App = () => (
       {/* Toast notification providers */}
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <Router>
         <Routes>
           {/* Main routes */}
           <Route path="/" element={<Index />} />
-          <Route path="/upload-resume" element={<ResumeUpload />} />
-          <Route path="/signup" element={<ResumeUpload />} />
-          <Route path="/demo" element={<ResumeUpload />} />
+          <Route path="/career-coach" element={<CareerCoach />} />
+          
+          {/* Implemented feature routes */}
           <Route path="/resume-optimizer" element={<ResumeOptimizer />} />
           <Route path="/resume-generator" element={<ResumeGenerator />} />
           <Route path="/cover-letter-writer" element={<CoverLetterWriter />} />
           <Route path="/portfolio-generator" element={<PortfolioGenerator />} />
           
           {/* Placeholder routes for upcoming features */}
-          <Route path="/portfolio-optimizer" element={<ResumeUpload />} />
-          <Route path="/linkedin-optimizer" element={<ResumeUpload />} />
-          <Route path="/career-coach" element={<ResumeUpload />} />
-          <Route path="/job-search-tracker" element={<ResumeUpload />} />
-          <Route path="/interview-coach" element={<ResumeUpload />} />
+          <Route path="/portfolio-optimizer" element={<PlaceholderPage />} />
+          <Route path="/linkedin-optimizer" element={<PlaceholderPage />} />
+          <Route path="/job-search-tracker" element={<PlaceholderPage />} />
+          <Route path="/interview-coach" element={<PlaceholderPage />} />
           
           {/* Catch-all route for 404 pages */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </BrowserRouter>
+      </Router>
     </TooltipProvider>
   </QueryClientProvider>
 );

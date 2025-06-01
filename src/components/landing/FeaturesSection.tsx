@@ -85,7 +85,7 @@ const FeatureCard = ({ feature }: { feature: any }) => {
       <CardContent className="flex-grow flex flex-col pt-0">
         <CardDescription className="text-gray-600 mb-4 text-sm flex-grow">{feature.description}</CardDescription>
         <Button className="w-full mt-auto" size="sm" asChild>
-          <Link to={feature.route}>{feature.cta}</Link>
+          <Link to={feature.route} state={{ buttonName: feature.cta }}>{feature.cta}</Link>
         </Button>
       </CardContent>
     </Card>
