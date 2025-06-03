@@ -74,7 +74,45 @@ Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-trick
 
 # Resume AI Backend
 
-This is the backend service for the Resume AI application, providing resume analysis, optimization, and cover letter generation capabilities.
+This is the backend service for the Resume AI application, providing comprehensive resume and career development tools.
+
+## Features
+
+1. **Resume Generator**
+   - Create professional resumes from scratch
+   - Import from LinkedIn (coming soon)
+   - Multiple resume formats and styles
+   - Real-time preview and PDF download
+
+2. **Resume Optimizer**
+   - Analyze resume against job descriptions
+   - Identify strengths and weaknesses
+   - Provide improvement suggestions
+   - Keyword gap analysis
+
+3. **Cover Letter Writer**
+   - Generate personalized cover letters
+   - Match experience with job requirements
+   - Multiple formatting options
+   - PDF export functionality
+
+4. **Portfolio Generator**
+   - Create professional portfolio websites
+   - Multiple design templates
+   - Responsive layouts
+   - Custom domain support
+
+5. **Career Coach**
+   - Career path analysis
+   - Skill gap identification
+   - Personalized recommendations
+   - Actionable next steps
+
+6. **Interview Coach**
+   - AI-powered mock interviews
+   - Role-specific questions
+   - Real-time feedback
+   - Performance analysis
 
 ## Deployment on Render
 
@@ -117,10 +155,35 @@ This is the backend service for the Resume AI application, providing resume anal
 
 ### API Endpoints
 
-- `POST /analyze-resume`: Analyze a resume against a job description
-- `POST /generate-resume`: Generate a professional resume
-- `POST /api/generate-cover-letter`: Generate a personalized cover letter
-- `POST /api/generate-portfolio`: Generate a portfolio website
+1. **Resume Generation**
+   - `POST /generate-resume`: Generate a professional resume
+   - Accepts JSON data or PDF format
+   - Returns PDF or JSON response
+
+2. **Resume Optimization**
+   - `POST /analyze-resume`: Analyze resume against job description
+   - Upload resume PDF and job description
+   - Returns detailed analysis
+
+3. **Cover Letter Generation**
+   - `POST /api/generate-cover-letter`: Generate personalized cover letter
+   - Upload resume and provide job details
+   - Returns PDF cover letter
+
+4. **Portfolio Generation**
+   - `POST /api/generate-portfolio`: Generate portfolio website
+   - Upload resume or provide portfolio data
+   - Returns HTML/CSS/JS files
+
+5. **Career Analysis**
+   - `POST /analyze-career`: Analyze career path and provide guidance
+   - Upload resume PDF
+   - Returns detailed career analysis
+
+6. **Interview Coaching**
+   - `POST /api/interview-coach/start`: Start mock interview session
+   - `POST /api/interview-coach/submit-answer`: Submit interview answer
+   - Returns next question or final analysis
 
 ### Local Development
 

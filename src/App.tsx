@@ -27,7 +27,6 @@ import PortfolioGenerator from "@/pages/PortfolioGenerator";
 import CareerCoach from "@/pages/CareerCoach";
 import InterviewCoach from "@/pages/InterviewCoach";
 import PlaceholderPage from "@/pages/PlaceholderPage";
-import { Outlet } from "react-router-dom";
 
 // Initialize React Query client
 const queryClient = new QueryClient();
@@ -48,22 +47,20 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
-      {/* Toast notification providers */}
-      <Toaster />
-      <Sonner />
+        {/* Toast notification providers */}
+        <Toaster />
+        <Sonner />
         <Router>
-        <Routes>
-            <Route path="/" element={<MainLayout><Outlet /></MainLayout>}>
-              <Route index element={<Index />} />
-              <Route path="resume-generator" element={<ResumeGenerator />} />
-              <Route path="resume-optimizer" element={<ResumeOptimizer />} />
-              <Route path="cover-letter-writer" element={<CoverLetterWriter />} />
-              <Route path="portfolio-generator" element={<PortfolioGenerator />} />
-              <Route path="career-coach" element={<CareerCoach />} />
-              <Route path="interview-coach" element={<InterviewCoach />} />
-              <Route path="*" element={<PlaceholderPage />} />
-            </Route>
-        </Routes>
+          <Routes>
+            <Route index element={<Index />} />
+            <Route path="resume-generator" element={<ResumeGenerator />} />
+            <Route path="resume-optimizer" element={<ResumeOptimizer />} />
+            <Route path="cover-letter-writer" element={<CoverLetterWriter />} />
+            <Route path="portfolio-generator" element={<PortfolioGenerator />} />
+            <Route path="career-coach" element={<CareerCoach />} />
+            <Route path="interview-coach" element={<InterviewCoach />} />
+            <Route path="*" element={<PlaceholderPage />} />
+          </Routes>
         </Router>
       </AuthProvider>
     </TooltipProvider>

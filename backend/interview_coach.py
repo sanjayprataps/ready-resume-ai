@@ -91,28 +91,31 @@ Based on the following Q&A history, provide the next role-specific interview que
 """
     else:
         return f"""
-You are an AI career coach. Analyze the following mock interview Q&A and provide structured feedback.
-Your response MUST be in the following JSON format:
+You are an AI career coach analyzing a mock interview. Provide your analysis in EXACTLY the following format, with no additional text or formatting:
+
 {{
     "questionAnalysis": [
         {{
-            "question": "The question asked",
-            "answer": "The candidate's answer",
-            "feedback": "Your detailed feedback on this answer"
-        }},
-        // ... repeat for each Q&A pair
+            "question": "<insert question - single line>",
+            "answer": "<insert answer - single line>",
+            "feedback": "<insert feedback - max 150 words, single line>"
+        }}
     ],
-    "overallAnalysis": "Your overall analysis of the candidate's performance"
+    "overallAnalysis": "<insert overall analysis - max 200 words, single line>"
 }}
 
-Here is the Q&A history to analyze:
+Guidelines:
+1. Use EXACTLY the JSON structure above
+2. Keep all text in single lines (no line breaks)
+3. Keep feedback under 150 words per answer
+4. Keep overall analysis under 200 words
+5. Do not use any special characters that would need escaping
+6. Do not add any text outside the JSON structure
+
+Q&A History to Analyze:
 {formatted}
 
-Remember to:
-1. Keep the exact JSON structure shown above
-2. Include all questions and answers in the analysis
-3. Provide specific, actionable feedback
-4. Ensure the JSON is properly formatted and valid
+Remember: Your response must be valid JSON that matches the exact structure above.
 """
 
 async def ask_groq(prompt: str) -> str:
