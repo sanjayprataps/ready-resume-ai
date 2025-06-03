@@ -76,7 +76,7 @@ const InterviewCoach = () => {
     formData.append("job_description", jobDescription);
 
     try {
-      const res = await fetch(API_ENDPOINTS.INTERVIEW_COACH.START, {
+      const res = await fetch(API_ENDPOINTS.INTERVIEW_COACH_START, {
         method: "POST",
         body: formData,
       });
@@ -120,7 +120,7 @@ const InterviewCoach = () => {
       formData.append('session_id', sessionId);
       formData.append('answer', userAnswer);
 
-      const res = await fetch(API_ENDPOINTS.INTERVIEW_COACH.SUBMIT_ANSWER, {
+      const res = await fetch(API_ENDPOINTS.INTERVIEW_COACH_SUBMIT, {
         method: "POST",
         body: formData,
       });
