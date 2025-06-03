@@ -12,8 +12,7 @@
  * - Call to action section
  */
 
-// Import layout and section components
-import MainLayout from "@/components/layout/MainLayout";
+// Import section components
 import HeroSection from "@/components/landing/HeroSection";
 import FeaturesSection from "@/components/landing/FeaturesSection";
 import HowItWorksSection from "@/components/landing/HowItWorksSection";
@@ -23,20 +22,20 @@ import CTASection from "@/components/landing/CTASection";
 /**
  * Index Component
  * 
- * Renders the landing page with all its sections wrapped in the main layout.
+ * Renders the landing page with all its sections.
  * Each section is a separate component for better organization and maintainability.
  * 
  * @returns {JSX.Element} The complete landing page
  */
 const Index = () => {
   return (
-    <MainLayout>
+    <>
       <HeroSection />
       <FeaturesSection />
       <HowItWorksSection />
       <TestimonialsSection />
       <CTASection />
-    </MainLayout>
+    </>
   );
 };
 

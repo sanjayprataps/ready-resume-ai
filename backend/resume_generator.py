@@ -1,8 +1,39 @@
 """
-Resume Generator Core Logic
--------------------------
-This file contains the core logic for generating professional resumes.
-The actual API endpoints are defined in main.py.
+Resume Generator Module
+---------------------
+This module handles the generation of professional resumes using AI. Key features include:
+
+1. Data Models:
+   - Structured data models for resume components
+   - Validation using Pydantic
+   - Type hints and documentation
+
+2. Resume Generation:
+   - AI-powered content generation using Groq LLM
+   - Professional formatting and structure
+   - Customizable templates
+   - PDF generation with proper styling
+
+3. Input Processing:
+   - Structured data formatting
+   - Skill categorization
+   - Experience and education formatting
+   - Project description handling
+
+4. Output Formats:
+   - JSON structured data
+   - HTML formatted resume
+   - PDF generation with proper styling
+   - Base64 encoded PDF for download
+
+5. Error Handling:
+   - Input validation
+   - API error handling
+   - Retry mechanisms
+   - Detailed error logging
+
+The module uses Jinja2 for HTML templating and pdfkit for PDF generation,
+ensuring professional and consistent output across different formats.
 """
 
 import os
@@ -60,7 +91,7 @@ class ResumeData(BaseModel):
 
 # Template for the prompt sent to Groq LLM
 GROQ_PROMPT_TEMPLATE = """
-You are a resume generation expert. Based on the user's input below, create a structured and professional resume.
+You are a resume generation expert. Based on the user's input below, create a structured and professional resume. 
 Use action verbs, quantify achievements where possible, and format in standard US resume format.
 
 ## Personal Information:
@@ -225,46 +256,46 @@ def generate_resume(resume_data: ResumeData):
                         {
                             "role": "system", 
                             "content": """You are a resume writing assistant. Your task is to generate a professional resume in JSON format.
-                            CRITICAL: You must ALWAYS return a valid JSON object with NO trailing commas, NO line breaks within strings, and NO markdown formatting.
-                            
-                            Required JSON structure:
-                            {
-                                "name": string,
-                                "email": string,
-                                "phone": string,
-                                "location": string,
-                                "linkedin": string,
-                                "website": string,
-                                "summary": string,
-                                "experience": [
-                                    {
-                                        "company": string,
-                                        "position": string,
-                                        "location": string,
-                                        "dates": string,
-                                        "description": string[]
-                                    }
-                                ],
-                                "education": [
-                                    {
-                                        "degree": string,
-                                        "institution": string,
-                                        "location": string,
-                                        "dates": string,
-                                        "gpa": string
-                                    }
-                                ],
-                                "skills": {
-                                    "technical": string[],
-                                    "soft": string[]
-                                },
-                                "projects": [
-                                    {
-                                        "name": string,
-                                        "description": string
-                                    }
-                                ]
-                            }"""
+                                CRITICAL: You must ALWAYS return a valid JSON object with NO trailing commas, NO line breaks within strings, and NO markdown formatting.
+                                
+                                Required JSON structure:
+                                {
+                                    "name": string,
+                                    "email": string,
+                                    "phone": string,
+                                    "location": string,
+                                    "linkedin": string,
+                                    "website": string,
+                                    "summary": string,
+                                    "experience": [
+                                        {
+                                            "company": string,
+                                            "position": string,
+                                            "location": string,
+                                            "dates": string,
+                                            "description": string[]
+                                        }
+                                    ],
+                                    "education": [
+                                        {
+                                            "degree": string,
+                                            "institution": string,
+                                            "location": string,
+                                            "dates": string,
+                                            "gpa": string
+                                        }
+                                    ],
+                                    "skills": {
+                                        "technical": string[],
+                                        "soft": string[]
+                                    },
+                                    "projects": [
+                                        {
+                                            "name": string,
+                                            "description": string
+                                        }
+                                    ]
+                                }"""
                         },
                         {"role": "user", "content": prompt}
                     ],
@@ -366,7 +397,7 @@ def generate_resume(resume_data: ResumeData):
                     print(f"Error: {str(e)}")
                     print(f"Problematic text: {cleaned_text[max(0, e.pos-50):min(len(cleaned_text), e.pos+50)]}")
                     raise ValueError(f"Failed to parse AI response as JSON: {str(e)}")
-                    
+                
             except Exception as e:
                 print(f"\n=== Attempt {retry_count + 1} Failed ===")
                 print(f"Error: {str(e)}")
@@ -375,7 +406,7 @@ def generate_resume(resume_data: ResumeData):
                     raise ValueError(f"All {max_retries} attempts failed to generate valid JSON: {str(e)}")
                 time.sleep(1)  # Add a small delay between retries
                 continue
-                
+            
     except Exception as e:
         print(f"\n=== Resume Generation Error ===")
         print(f"Error: {str(e)}")

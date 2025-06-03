@@ -1,8 +1,28 @@
 """
 Main API Router
 --------------
-This file serves as the main API router for the application.
-It imports and uses the core logic from resume_optimizer.py, resume_generator.py, and portfolio_generator.py.
+This file serves as the main API router for the Resume AI application. It provides endpoints for:
+1. Resume Analysis - Analyze resumes against job descriptions
+2. Resume Generation - Generate professional resumes from structured data
+3. Cover Letter Generation - Create personalized cover letters
+4. Portfolio Generation - Generate portfolio websites
+5. Career Analysis - Provide career guidance based on resume
+6. Interview Coach - Conduct AI-powered mock interviews
+
+The router integrates with various core modules:
+- resume_optimizer.py: Resume analysis and optimization
+- resume_generator.py: Resume generation and formatting
+- coverletter_writer.py: Cover letter generation
+- portfolio_generator.py: Portfolio website generation
+- career_coach.py: Career guidance and analysis
+- interview_coach.py: Mock interview functionality
+
+Each endpoint includes:
+- Input validation
+- Error handling
+- File processing (where applicable)
+- Response formatting
+- CORS middleware for frontend integration
 """
 
 import os
@@ -18,6 +38,7 @@ from resume_generator import ResumeData, generate_resume
 from coverletter_writer import generate_cover_letter, CoverLetterInput
 from portfolio_generator import PortfolioData, generate_portfolio, extract_text_from_pdf as extract_portfolio_text
 from career_coach import analyze_career
+from interview_coach import start_interview, submit_answer
 
 # Load environment variables from .env file
 load_dotenv()
@@ -378,6 +399,66 @@ async def analyze_career_endpoint(resume: UploadFile = File(description="Upload 
     finally:
         print("\n=== Request Processing Complete ===")
         await resume.close()
+
+@app.post("/api/interview-coach/start")
+async def start_interview_endpoint(
+    resume: UploadFile = File(description="Upload your resume in PDF format"),
+    job_description: str = Form(description="Paste the job description here")
+):
+    """
+    Start a new mock interview session.
+    
+    - **resume**: Upload your resume in PDF format
+    - **job_description**: Paste the job description here
+    """
+    try:
+        print(f"\n=== Starting Interview Session ===")
+        print(f"Received resume file: {resume.filename}, content type: {resume.content_type}")
+        
+        # Validate file type
+        if not resume.filename.lower().endswith('.pdf'):
+            print("Invalid file type:", resume.filename)
+            raise HTTPException(status_code=400, detail="Only PDF files are supported")
+        
+        # Start interview
+        result = await start_interview(resume, job_description)
+        return JSONResponse(content=result)
+        
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        print(f"\n=== Unexpected Error ===")
+        print(f"Error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
+    finally:
+        await resume.close()
+
+@app.post("/api/interview-coach/submit-answer")
+async def submit_answer_endpoint(
+    session_id: str = Form(...),
+    answer: str = Form(...)
+):
+    """
+    Submit an answer to an interview question and get the next question or analysis.
+    
+    - **session_id**: The interview session ID
+    - **answer**: The candidate's answer
+    """
+    try:
+        print(f"\n=== Processing Interview Answer ===")
+        print(f"Session ID: {session_id}")
+        print(f"Answer: {answer}")
+        
+        # Process answer
+        result = await submit_answer(session_id=session_id, answer=answer)
+        return JSONResponse(content=result)
+        
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        print(f"\n=== Unexpected Error ===")
+        print(f"Error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
 
 @app.get("/")
 async def root():

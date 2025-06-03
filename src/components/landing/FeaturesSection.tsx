@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, User, Book, Calendar, Mail, Mic, Search, Award, Link as LinkIcon, BrainCircuit, Target } from "lucide-react";
+import { FileText, User, Book, Calendar, Mail, Mic, Search, Award, Link as LinkIcon, BrainCircuit, Target, PenTool, Layout } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 

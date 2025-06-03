@@ -1,8 +1,40 @@
 """
-Resume Optimizer Core Logic
---------------------------
-This file contains the core logic for analyzing resumes against job descriptions.
-The actual API endpoints are defined in main.py.
+Resume Optimizer Module
+--------------------
+This module provides AI-powered resume optimization and analysis. Features include:
+
+1. Resume Analysis:
+   - Job description matching
+   - Skills gap analysis
+   - Experience relevance check
+   - ATS compatibility check
+
+2. Optimization Features:
+   - Content improvement suggestions
+   - Keyword optimization
+   - Format recommendations
+   - Impact enhancement
+
+3. Analysis Components:
+   - Skills matching
+   - Experience alignment
+   - Education relevance
+   - Overall presentation
+
+4. Integration:
+   - PDF text extraction
+   - Groq LLM API integration
+   - Structured analysis output
+   - Error handling and validation
+
+5. Output Format:
+   - Detailed optimization suggestions
+   - Specific improvement areas
+   - Actionable recommendations
+   - ATS compatibility score
+
+The module helps users optimize their resumes for specific job descriptions,
+improving their chances of passing ATS systems and catching recruiters' attention.
 """
 
 import os

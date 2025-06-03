@@ -17,16 +17,17 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
-// Import page components
-import Index from "./pages/Index";
-import CareerCoach from "./pages/CareerCoach";
-import NotFound from "./pages/NotFound";
-import PlaceholderPage from "./pages/PlaceholderPage";
-import ResumeOptimizer from "./pages/ResumeOptimizer";
-import ResumeGenerator from "./pages/ResumeGenerator";
-import CoverLetterWriter from "./pages/CoverLetterWriter";
-import PortfolioGenerator from "./pages/PortfolioGenerator";
+import { AuthProvider } from "@/contexts/AuthContext";
+import MainLayout from "@/components/layout/MainLayout";
+import Index from "@/pages/Index";
+import ResumeGenerator from "@/pages/ResumeGenerator";
+import ResumeOptimizer from "@/pages/ResumeOptimizer";
+import CoverLetterWriter from "@/pages/CoverLetterWriter";
+import PortfolioGenerator from "@/pages/PortfolioGenerator";
+import CareerCoach from "@/pages/CareerCoach";
+import InterviewCoach from "@/pages/InterviewCoach";
+import PlaceholderPage from "@/pages/PlaceholderPage";
+import { Outlet } from "react-router-dom";
 
 // Initialize React Query client
 const queryClient = new QueryClient();
@@ -39,37 +40,32 @@ const queryClient = new QueryClient();
  * 2. Tooltip provider for enhanced UI interactions
  * 3. Multiple toast notification systems
  * 4. React Router for navigation
+ * 5. Authentication context for user management
  * 
  * @returns {JSX.Element} The root component of the application
  */
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <AuthProvider>
       {/* Toast notification providers */}
       <Toaster />
       <Sonner />
-      <Router>
+        <Router>
         <Routes>
-          {/* Main routes */}
-          <Route path="/" element={<Index />} />
-          <Route path="/career-coach" element={<CareerCoach />} />
-          
-          {/* Implemented feature routes */}
-          <Route path="/resume-optimizer" element={<ResumeOptimizer />} />
-          <Route path="/resume-generator" element={<ResumeGenerator />} />
-          <Route path="/cover-letter-writer" element={<CoverLetterWriter />} />
-          <Route path="/portfolio-generator" element={<PortfolioGenerator />} />
-          
-          {/* Placeholder routes for upcoming features */}
-          <Route path="/portfolio-optimizer" element={<PlaceholderPage />} />
-          <Route path="/linkedin-optimizer" element={<PlaceholderPage />} />
-          <Route path="/job-search-tracker" element={<PlaceholderPage />} />
-          <Route path="/interview-coach" element={<PlaceholderPage />} />
-          
-          {/* Catch-all route for 404 pages */}
-          <Route path="*" element={<NotFound />} />
+            <Route path="/" element={<MainLayout><Outlet /></MainLayout>}>
+              <Route index element={<Index />} />
+              <Route path="resume-generator" element={<ResumeGenerator />} />
+              <Route path="resume-optimizer" element={<ResumeOptimizer />} />
+              <Route path="cover-letter-writer" element={<CoverLetterWriter />} />
+              <Route path="portfolio-generator" element={<PortfolioGenerator />} />
+              <Route path="career-coach" element={<CareerCoach />} />
+              <Route path="interview-coach" element={<InterviewCoach />} />
+              <Route path="*" element={<PlaceholderPage />} />
+            </Route>
         </Routes>
-      </Router>
+        </Router>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

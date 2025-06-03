@@ -1,7 +1,40 @@
 """
-Career Coach Core Logic
----------------------
-This file contains the core logic for analyzing resumes and providing career guidance.
+Career Coach Module
+-----------------
+This module provides AI-powered career guidance and analysis. Features include:
+
+1. Career Analysis:
+   - Resume-based career path analysis
+   - Skills assessment and recommendations
+   - Industry trend analysis
+   - Career progression suggestions
+
+2. Guidance Features:
+   - Personalized career recommendations
+   - Skill development suggestions
+   - Industry insights
+   - Professional development paths
+
+3. Analysis Components:
+   - Experience evaluation
+   - Education assessment
+   - Skills gap analysis
+   - Market alignment check
+
+4. Integration:
+   - Resume text extraction
+   - Groq LLM API integration
+   - Structured response formatting
+   - Error handling and validation
+
+5. Output Format:
+   - Detailed career analysis
+   - Actionable recommendations
+   - Skill development roadmap
+   - Industry insights
+
+The module uses AI to provide personalized career guidance based on the user's
+resume, helping them make informed decisions about their career path.
 """
 
 import os

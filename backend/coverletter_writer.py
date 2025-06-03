@@ -1,8 +1,40 @@
 """
-Cover Letter Writer Core Logic
-----------------------------
-This file contains the core logic for generating personalized cover letters.
-The actual API endpoints are defined in main.py.
+Cover Letter Writer Module
+------------------------
+This module handles the generation of personalized cover letters. Features include:
+
+1. Cover Letter Generation:
+   - AI-powered content generation using Groq LLM
+   - Personalized content based on resume and job details
+   - Professional formatting and structure
+   - PDF generation with proper styling
+
+2. Input Processing:
+   - Resume text extraction and analysis
+   - Job description parsing
+   - Company and position details handling
+   - Customization options
+
+3. Content Features:
+   - Personalized introductions
+   - Relevant experience highlighting
+   - Skills and qualifications matching
+   - Professional closing statements
+
+4. Output Formats:
+   - PDF generation with proper styling
+   - Professional formatting
+   - Consistent branding
+   - Downloadable format
+
+5. Integration:
+   - Resume text extraction
+   - Groq LLM API integration
+   - PDF generation
+   - Error handling and validation
+
+The module ensures each cover letter is unique and tailored to the specific job
+application while maintaining professional standards and formatting.
 """
 
 import os
