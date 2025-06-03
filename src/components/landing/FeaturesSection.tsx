@@ -58,7 +58,7 @@ const featuresData = {
       description: "Get personalized right-fit Job recommendations with advanced matching algorithms and application tracking.",
       icon: "Calendar",
       cta: "Search Jobs",
-      route: "/job-search-tracker",
+      route: "/job-search",
       fullWidth: true
     }
   ]

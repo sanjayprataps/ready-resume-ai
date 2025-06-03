@@ -14,11 +14,12 @@ interface CareerPath {
 }
 
 interface CareerAnalysis {
-  career_strengths: string[];
-  areas_for_improvement: string[];
-  skill_gaps: string[];
-  actionable_recommendations: string[];
-  potential_career_paths: CareerPath[];
+  career_summary: string;
+  key_strengths: string[];
+  areas_for_growth: string[];
+  career_paths: string[];
+  skill_development: string[];
+  industry_opportunities: string[];
 }
 
 const CareerCoach = () => {
@@ -114,7 +115,7 @@ const CareerCoach = () => {
       const data = await response.json();
       console.log("Received data:", data);
 
-      if (data.status === "success") {
+      if (data.status === "success" && data.analysis) {
         setAnalysis(data.analysis);
         
         // Convert base64 PDF to blob for preview if available
@@ -263,6 +264,12 @@ const CareerCoach = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-8">
+                  {/* Career Summary */}
+                  <div className="bg-white p-6 rounded-lg border">
+                    <h3 className="text-lg font-semibold text-portfolioai-primary mb-4">Career Summary</h3>
+                    <p className="text-gray-700">{analysis.career_summary}</p>
+                  </div>
+
                   {/* Analysis Sections */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-4 bg-green-50 p-6 rounded-lg border border-green-100">
@@ -270,10 +277,10 @@ const CareerCoach = () => {
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                         </svg>
-                        Career Strengths
+                        Key Strengths
                       </h3>
                       <ul className="list-none space-y-2">
-                        {analysis.career_strengths.map((strength, index) => (
+                        {analysis.key_strengths?.map((strength, index) => (
                           <li key={index} className="text-green-700 flex items-start gap-2">
                             <span className="text-green-500">•</span>
                             {strength}
@@ -287,10 +294,10 @@ const CareerCoach = () => {
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
-                        Areas for Improvement
+                        Areas for Growth
                       </h3>
                       <ul className="list-none space-y-2">
-                        {analysis.areas_for_improvement.map((area, index) => (
+                        {analysis.areas_for_growth?.map((area, index) => (
                           <li key={index} className="text-blue-700 flex items-start gap-2">
                             <span className="text-blue-500">•</span>
                             {area}
@@ -304,13 +311,13 @@ const CareerCoach = () => {
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                         </svg>
-                        Skill Gaps
+                        Skill Development
                       </h3>
                       <ul className="list-none space-y-2">
-                        {analysis.skill_gaps.map((gap, index) => (
+                        {analysis.skill_development?.map((skill, index) => (
                           <li key={index} className="text-amber-700 flex items-start gap-2">
                             <span className="text-amber-500">•</span>
-                            {gap}
+                            {skill}
                           </li>
                         ))}
                       </ul>
@@ -321,13 +328,13 @@ const CareerCoach = () => {
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
-                        Actionable Recommendations
+                        Industry Opportunities
                       </h3>
                       <ul className="list-none space-y-2">
-                        {analysis.actionable_recommendations.map((rec, index) => (
+                        {analysis.industry_opportunities?.map((opportunity, index) => (
                           <li key={index} className="text-purple-700 flex items-start gap-2">
                             <span className="text-purple-500">•</span>
-                            {rec}
+                            {opportunity}
                           </li>
                         ))}
                       </ul>
@@ -339,37 +346,29 @@ const CareerCoach = () => {
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                       </svg>
-                      Potential Career Paths
+                      Career Paths
                     </h3>
                     <div className="grid grid-cols-1 gap-4">
-                      {analysis.potential_career_paths.map((path, index) => (
+                      {analysis.career_paths?.map((path, index) => (
                         <div key={index} className="bg-gradient-to-r from-portfolioai-primary/5 to-portfolioai-secondary/5 p-6 rounded-lg border border-portfolioai-primary/10 hover:shadow-md transition-shadow">
-                          <h4 className="font-semibold text-lg mb-3 text-portfolioai-primary">{path.role}</h4>
-                          <div className="space-y-3">
-                            <p className="text-gray-700">
-                              <span className="font-medium text-portfolioai-secondary">Why it's a good fit:</span>
-                              <span className="ml-2">{path.fit}</span>
-                            </p>
-                            <p className="text-gray-700">
-                              <span className="font-medium text-portfolioai-secondary">Next steps:</span>
-                              <span className="ml-2">{path.next_steps}</span>
-                            </p>
-                          </div>
+                          <h4 className="font-semibold text-lg mb-3 text-portfolioai-primary">{path}</h4>
                         </div>
                       ))}
                     </div>
                   </div>
 
                   {/* Download Button */}
-                  <div className="flex justify-center">
-                    <Button 
-                      onClick={handleDownloadPDF}
-                      className="bg-portfolioai-primary hover:bg-portfolioai-secondary transition-colors"
-                    >
-                      <Download className="mr-2 h-4 w-4" />
-                      Download Full Report
-                    </Button>
-                  </div>
+                  {pdfUrl && (
+                    <div className="flex justify-center">
+                      <Button 
+                        onClick={handleDownloadPDF}
+                        className="bg-portfolioai-primary hover:bg-portfolioai-secondary transition-colors"
+                      >
+                        <Download className="mr-2 h-4 w-4" />
+                        Download Full Report
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

@@ -8,6 +8,7 @@ This file serves as the main API router for the Resume AI application. It provid
 4. Portfolio Generation - Generate portfolio websites
 5. Career Analysis - Provide career guidance based on resume
 6. Interview Coach - Conduct AI-powered mock interviews
+7. Job Search - Search jobs using keywords or resume
 
 The router integrates with various core modules:
 - resume_optimizer.py: Resume analysis and optimization
@@ -39,6 +40,7 @@ from coverletter_writer import generate_cover_letter, CoverLetterInput
 from portfolio_generator import PortfolioData, generate_portfolio, extract_text_from_pdf as extract_portfolio_text
 from career_coach import analyze_career
 from interview_coach import start_interview, submit_answer
+from job_search import router as job_search_router
 
 # Load environment variables from .env file
 load_dotenv()
@@ -69,6 +71,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include routers
+app.include_router(job_search_router)
 
 @app.post("/analyze-resume")
 async def analyze_resume_endpoint(
@@ -381,7 +386,7 @@ async def analyze_career_endpoint(resume: UploadFile = File(description="Upload 
         # Get career analysis
         try:
             print("\n=== Starting Career Analysis ===")
-            result = analyze_career(resume_text)
+            result = await analyze_career(resume_text)
             print("\n=== Career Analysis Complete ===")
             print("Analysis status:", result.get("status"))
             

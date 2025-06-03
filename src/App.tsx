@@ -26,6 +26,7 @@ import CoverLetterWriter from "@/pages/CoverLetterWriter";
 import PortfolioGenerator from "@/pages/PortfolioGenerator";
 import CareerCoach from "@/pages/CareerCoach";
 import InterviewCoach from "@/pages/InterviewCoach";
+import JobSearch from "@/pages/JobSearch";
 import PlaceholderPage from "@/pages/PlaceholderPage";
 
 // Initialize React Query client
@@ -59,6 +60,7 @@ const App = () => (
             <Route path="portfolio-generator" element={<PortfolioGenerator />} />
             <Route path="career-coach" element={<CareerCoach />} />
             <Route path="interview-coach" element={<InterviewCoach />} />
+            <Route path="job-search" element={<JobSearch />} />
             <Route path="*" element={<PlaceholderPage />} />
           </Routes>
         </Router>

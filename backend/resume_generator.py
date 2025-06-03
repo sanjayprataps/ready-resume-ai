@@ -45,6 +45,7 @@ import json
 import pdfkit
 import tempfile
 import base64
+import time  # Add time module import
 
 # Pydantic models for data structure
 class Experience(BaseModel):
@@ -297,36 +298,24 @@ def generate_resume(resume_data: ResumeData):
                                     ]
                                 }"""
                         },
-                        {"role": "user", "content": prompt}
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
                     ],
                     temperature=0.7,
-                    max_tokens=1000
+                    max_tokens=2000
                 )
                 
-                # Process the response
-                output_text = completion.choices[0].message.content.strip()
-                print("\n=== Raw Response from Groq ===")
-                print(output_text)
+                # Extract and clean the response
+                response_text = completion.choices[0].message.content
+                cleaned_text = response_text.strip()
                 
-                if not output_text:
-                    raise ValueError("Empty response received from Groq API")
-                
-                # Clean the response
-                cleaned_text = output_text
+                # Remove markdown code block formatting if present
                 if "```json" in cleaned_text:
                     cleaned_text = cleaned_text.split("```json")[1].split("```")[0].strip()
                 elif "```" in cleaned_text:
                     cleaned_text = cleaned_text.split("```")[1].split("```")[0].strip()
-                
-                # Extract only the JSON object
-                start_idx = cleaned_text.find("{")
-                end_idx = cleaned_text.rfind("}")
-                if start_idx == -1 or end_idx == -1:
-                    raise ValueError("Invalid JSON structure in response")
-                
-                cleaned_text = cleaned_text[start_idx:end_idx + 1]
-                print("\n=== Cleaned Response ===")
-                print(cleaned_text)
                 
                 try:
                     # Parse and validate the JSON response
@@ -347,9 +336,6 @@ def generate_resume(resume_data: ResumeData):
                     
                     # Convert HTML to PDF using pdfkit
                     print("\n=== Converting to PDF ===")
-                    import time
-                    import tempfile
-                    import shutil
                     
                     # Create a temporary directory for PDF generation
                     with tempfile.TemporaryDirectory() as temp_dir:
@@ -363,7 +349,9 @@ def generate_resume(resume_data: ResumeData):
                             'margin-bottom': '20mm',
                             'margin-left': '20mm',
                             'encoding': 'UTF-8',
-                            'no-outline': None
+                            'no-outline': None,
+                            'quiet': '',
+                            'enable-local-file-access': None
                         }
                         
                         try:
@@ -395,6 +383,8 @@ def generate_resume(resume_data: ResumeData):
                 except json.JSONDecodeError as e:
                     print(f"\n=== JSON Parse Error ===")
                     print(f"Error: {str(e)}")
+                    print(f"Raw response: {response_text}")
+                    print(f"Cleaned text: {cleaned_text}")
                     print(f"Problematic text: {cleaned_text[max(0, e.pos-50):min(len(cleaned_text), e.pos+50)]}")
                     raise ValueError(f"Failed to parse AI response as JSON: {str(e)}")
                 
