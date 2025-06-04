@@ -11,14 +11,14 @@ const featuresData = {
     // Row 1
     {
       name: "AI Resume Optimizer",
-      description: "Real time analysis with Highlighted strengths and improvements suggestions.",
+      description: "Real time analysis with highlighted strengths and improvements suggestions.",
       icon: "Search",
       cta: "Optimize Now",
       route: "/resume-optimizer"
     },
     {
       name: "AI Resume Generator", 
-      description: "Don't have a Resume?, No problem! Generate a resume by answering guided questions.",
+      description: "Don't have a Resume? No problem! Generate a resume by answering guided questions.",
       icon: "FileText",
       cta: "Generate Resume",
       route: "/resume-generator"

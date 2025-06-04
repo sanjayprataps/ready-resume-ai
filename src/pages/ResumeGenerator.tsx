@@ -604,7 +604,7 @@ const ResumeGenerator = () => {
             </div>
             <h1 className="text-3xl font-bold text-portfolioai-primary">AI Resume Generator</h1>
             <p className="mt-3 text-gray-600">
-              Don't have a Resume or CV? No problem! Import your LinkedIn profile or answer guided questions
+              Don't have a Resume? No problem! Generate a resume by answering guided questions.
             </p>
           </div>
 

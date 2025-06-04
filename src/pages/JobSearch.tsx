@@ -169,7 +169,7 @@ const JobSearch = () => {
             </div>
             <h1 className="text-3xl font-bold text-portfolioai-primary">AI Job Search</h1>
             <p className="mt-3 text-gray-600">
-              Find your perfect job match using keywords or your resume
+              Get personalized job matches by matching to keywords or your Resume data.
             </p>
           </div>
 

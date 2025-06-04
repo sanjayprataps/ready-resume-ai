@@ -169,7 +169,9 @@ const InterviewCoach = () => {
           <div className="text-center max-w-2xl mx-auto mb-12">
             <Mic className="h-12 w-12 text-portfolioai-accent mx-auto" />
             <h1 className="text-3xl font-bold text-portfolioai-primary">AI Interview Coach</h1>
-            <p className="text-gray-600 mt-3">Practice mock interviews with personalized AI feedback.</p>
+            <p className="mt-3 text-gray-600">
+              Get role specific interview practice with analysis and improvement tips.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

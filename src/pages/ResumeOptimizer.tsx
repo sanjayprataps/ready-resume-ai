@@ -127,7 +127,7 @@ const ResumeOptimizer = () => {
             </div>
             <h1 className="text-3xl font-bold text-portfolioai-primary">AI Resume Optimizer</h1>
             <p className="mt-3 text-gray-600">
-              Get real-time score, keyword gap analysis vs. target job description, and auto-rewrite suggestions
+              Real time analysis with highlighted strengths and improvements suggestions
             </p>
           </div>
 
