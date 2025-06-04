@@ -93,88 +93,46 @@ export default function PortfolioGeneratorPage() {
   const [selectedStyle, setSelectedStyle] = useState<PortfolioStyle>('professional');
 
   const handleSubmit = async () => {
-    if (activeTab === "upload") {
-      if (!resumeFile) {
-        toast.error('Please upload a resume file.');
-        return;
+    if (!validateForm()) {
+      toast.error("Please fill in all required fields");
+      if (validationErrors.length > 0) {
+        scrollToError(validationErrors[0]);
       }
+      return;
+    }
 
+    setLoading(true);
+    try {
       const formData = new FormData();
-      formData.append('method', 'upload');
-      formData.append('resume', resumeFile);
+      formData.append('method', 'guided');
+      formData.append('portfolio_data', JSON.stringify(resumeData));
       formData.append('style', selectedStyle);
 
-      setLoading(true);
-      try {
-        const response = await fetch(API_ENDPOINTS.GENERATE_PORTFOLIO, {
-          method: 'POST',
-          body: formData,
-        });
+      const response = await fetch(API_ENDPOINTS.GENERATE_PORTFOLIO, {
+        method: 'POST',
+        body: formData,
+      });
 
-        if (!response.ok) {
-          const errorData = await response.text();
-          throw new Error(`Failed to generate portfolio: ${errorData}`);
-        }
-
-        const result = await response.json();
-        if (result.status === "success") {
-          // Create a blob from the HTML content
-          const blob = new Blob([result.portfolio.html], { type: 'text/html' });
-          const url = window.URL.createObjectURL(blob);
-          setDownloadUrl(url);
-          toast.success("Portfolio generated successfully!");
-        } else {
-          throw new Error(result.detail || "Failed to generate portfolio");
-        }
-      } catch (err) {
-        console.error("Error generating portfolio:", err);
-        toast.error(err instanceof Error ? err.message : "Failed to generate portfolio. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      // Guided input method
-      if (!validateForm()) {
-        toast.error("Please fill in all required fields");
-        if (validationErrors.length > 0) {
-          scrollToError(validationErrors[0]);
-        }
-        return;
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`Failed to generate portfolio: ${errorData}`);
       }
 
-      setLoading(true);
-      try {
-        const formData = new FormData();
-        formData.append('method', 'guided');
-        formData.append('portfolio_data', JSON.stringify(resumeData));
-        formData.append('style', selectedStyle);
-
-        const response = await fetch(API_ENDPOINTS.GENERATE_PORTFOLIO, {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!response.ok) {
-          const errorData = await response.text();
-          throw new Error(`Failed to generate portfolio: ${errorData}`);
-        }
-
-        const result = await response.json();
-        if (result.status === "success") {
-          // Create a blob from the HTML content
-          const blob = new Blob([result.portfolio.html], { type: 'text/html' });
-          const url = window.URL.createObjectURL(blob);
-          setDownloadUrl(url);
-          toast.success("Portfolio generated successfully!");
-        } else {
-          throw new Error(result.detail || "Failed to generate portfolio");
-        }
-      } catch (err) {
-        console.error("Error generating portfolio:", err);
-        toast.error(err instanceof Error ? err.message : "Failed to generate portfolio. Please try again.");
-      } finally {
-        setLoading(false);
+      const result = await response.json();
+      if (result.status === "success") {
+        // Create a blob from the HTML content
+        const blob = new Blob([result.portfolio.html], { type: 'text/html' });
+        const url = window.URL.createObjectURL(blob);
+        setDownloadUrl(url);
+        toast.success("Portfolio generated successfully!");
+      } else {
+        throw new Error(result.detail || "Failed to generate portfolio");
       }
+    } catch (err) {
+      console.error("Error generating portfolio:", err);
+      toast.error(err instanceof Error ? err.message : "Failed to generate portfolio. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -297,287 +255,249 @@ export default function PortfolioGeneratorPage() {
           {/* Main content */}
           <Card className="max-w-4xl mx-auto">
             <CardHeader>
-              <CardTitle>Choose Your Method</CardTitle>
-              <CardDescription>Select how you'd like to generate your portfolio</CardDescription>
+              <CardTitle className="text-center">Fill your data in the form to generate your portfolio</CardTitle>
             </CardHeader>
             <CardContent>
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid grid-cols-2 mb-8">
-                  <TabsTrigger value="upload" className="flex items-center gap-2">
-                    <Upload className="h-4 w-4" />
-                    Upload Resume
-                  </TabsTrigger>
-                  <TabsTrigger value="guided" className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    Guided Questions
-                  </TabsTrigger>
-                </TabsList>
+              <div className="space-y-6">
+                {/* Personal Information Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Personal Information</h3>
+                  <Card className="p-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="full_name">Full Name *</Label>
+                        <Input
+                          id="full_name"
+                          placeholder="John Doe"
+                          value={resumeData.personal_info.full_name}
+                          onChange={(e) => setResumeData(prev => ({
+                            ...prev,
+                            personal_info: { ...prev.personal_info, full_name: e.target.value }
+                          }))}
+                          className={cn(getFieldError('full_name') && "border-red-500")}
+                        />
+                      </div>
 
-                <TabsContent value="upload" className="space-y-6">
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                    <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                    <Input
-                      type="file"
-                      accept=".pdf"
-                      onChange={handleFileChange}
-                      className="hidden"
-                      id="resume-upload"
-                    />
-                    <Button 
-                      variant="outline" 
-                      onClick={() => document.getElementById("resume-upload")?.click()}
-                    >
-                      Choose Resume File
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email *</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          placeholder="john@example.com"
+                          value={resumeData.personal_info.email}
+                          onChange={(e) => setResumeData(prev => ({
+                            ...prev,
+                            personal_info: { ...prev.personal_info, email: e.target.value }
+                          }))}
+                          className={cn(getFieldError('email') && "border-red-500")}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="phone">Phone *</Label>
+                        <Input
+                          id="phone"
+                          placeholder="(555) 123-4567"
+                          value={resumeData.personal_info.phone}
+                          onChange={(e) => setResumeData(prev => ({
+                            ...prev,
+                            personal_info: { ...prev.personal_info, phone: e.target.value }
+                          }))}
+                          className={cn(getFieldError('phone') && "border-red-500")}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="location">Location *</Label>
+                        <Input
+                          id="location"
+                          placeholder="City, State"
+                          value={resumeData.personal_info.location}
+                          onChange={(e) => setResumeData(prev => ({
+                            ...prev,
+                            personal_info: { ...prev.personal_info, location: e.target.value }
+                          }))}
+                          className={cn(getFieldError('location') && "border-red-500")}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="linkedin">LinkedIn Profile (Optional)</Label>
+                        <Input
+                          id="linkedin"
+                          placeholder="linkedin.com/in/johndoe"
+                          value={resumeData.personal_info.linkedin}
+                          onChange={(e) => setResumeData(prev => ({
+                            ...prev,
+                            personal_info: { ...prev.personal_info, linkedin: e.target.value }
+                          }))}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mt-4 space-y-2">
+                      <Label htmlFor="summary">Professional Summary *</Label>
+                      <Textarea
+                        id="summary"
+                        placeholder="Write a brief summary of your professional background and career goals..."
+                        value={resumeData.personal_info.summary}
+                        onChange={(e) => setResumeData(prev => ({
+                          ...prev,
+                          personal_info: { ...prev.personal_info, summary: e.target.value }
+                        }))}
+                        rows={4}
+                        className={cn(getFieldError('summary') && "border-red-500")}
+                      />
+                    </div>
+                  </Card>
+                </div>
+
+                {/* Experience Section */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">Work Experience</h3>
+                    <Button variant="outline" onClick={handleAddExperience}>
+                      Add Experience
                     </Button>
-                    {resumeFile && (
-                      <p className="mt-2 text-sm text-gray-600">Selected: {resumeFile.name}</p>
-                    )}
                   </div>
-                </TabsContent>
-
-                <TabsContent value="guided" className="space-y-6">
-                  <div className="space-y-8">
-                    {/* Personal Information Section */}
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold">Personal Information</h3>
-                      <Card className="p-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="full_name">Full Name *</Label>
-                            <Input
-                              id="full_name"
-                              placeholder="John Doe"
-                              value={resumeData.personal_info.full_name}
-                              onChange={(e) => setResumeData(prev => ({
-                                ...prev,
-                                personal_info: { ...prev.personal_info, full_name: e.target.value }
-                              }))}
-                              className={cn(getFieldError('full_name') && "border-red-500")}
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="email">Email *</Label>
-                            <Input
-                              id="email"
-                              type="email"
-                              placeholder="john@example.com"
-                              value={resumeData.personal_info.email}
-                              onChange={(e) => setResumeData(prev => ({
-                                ...prev,
-                                personal_info: { ...prev.personal_info, email: e.target.value }
-                              }))}
-                              className={cn(getFieldError('email') && "border-red-500")}
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="phone">Phone *</Label>
-                            <Input
-                              id="phone"
-                              placeholder="(555) 123-4567"
-                              value={resumeData.personal_info.phone}
-                              onChange={(e) => setResumeData(prev => ({
-                                ...prev,
-                                personal_info: { ...prev.personal_info, phone: e.target.value }
-                              }))}
-                              className={cn(getFieldError('phone') && "border-red-500")}
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="location">Location *</Label>
-                            <Input
-                              id="location"
-                              placeholder="City, State"
-                              value={resumeData.personal_info.location}
-                              onChange={(e) => setResumeData(prev => ({
-                                ...prev,
-                                personal_info: { ...prev.personal_info, location: e.target.value }
-                              }))}
-                              className={cn(getFieldError('location') && "border-red-500")}
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="linkedin">LinkedIn Profile (Optional)</Label>
-                            <Input
-                              id="linkedin"
-                              placeholder="linkedin.com/in/johndoe"
-                              value={resumeData.personal_info.linkedin}
-                              onChange={(e) => setResumeData(prev => ({
-                                ...prev,
-                                personal_info: { ...prev.personal_info, linkedin: e.target.value }
-                              }))}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="mt-4 space-y-2">
-                          <Label htmlFor="summary">Professional Summary *</Label>
-                          <Textarea
-                            id="summary"
-                            placeholder="Write a brief summary of your professional background and career goals..."
-                            value={resumeData.personal_info.summary}
-                            onChange={(e) => setResumeData(prev => ({
-                              ...prev,
-                              personal_info: { ...prev.personal_info, summary: e.target.value }
-                            }))}
-                            rows={4}
-                            className={cn(getFieldError('summary') && "border-red-500")}
-                          />
-                        </div>
-                      </Card>
-                    </div>
-
-                    {/* Experience Section */}
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <h3 className="text-lg font-semibold">Work Experience</h3>
-                        <Button variant="outline" onClick={handleAddExperience}>
-                          Add Experience
-                        </Button>
+                  {resumeData.experience.map((exp, index) => (
+                    <Card key={index} className="p-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <Input
+                          placeholder="Job Title"
+                          value={exp.job_title}
+                          onChange={(e) => handleExperienceChange(index, "job_title", e.target.value)}
+                          className={cn(getFieldError('job_title', index) && "border-red-500")}
+                        />
+                        <Input
+                          placeholder="Company"
+                          value={exp.company}
+                          onChange={(e) => handleExperienceChange(index, "company", e.target.value)}
+                          className={cn(getFieldError('company', index) && "border-red-500")}
+                        />
+                        <Input
+                          placeholder="Start Date"
+                          value={exp.start_date}
+                          onChange={(e) => handleExperienceChange(index, "start_date", e.target.value)}
+                          className={cn(getFieldError('start_date', index) && "border-red-500")}
+                        />
+                        <Input
+                          placeholder="End Date"
+                          value={exp.end_date}
+                          onChange={(e) => handleExperienceChange(index, "end_date", e.target.value)}
+                          className={cn(getFieldError('end_date', index) && "border-red-500")}
+                        />
+                        <Input
+                          placeholder="Location"
+                          value={exp.location}
+                          onChange={(e) => handleExperienceChange(index, "location", e.target.value)}
+                          className={cn(getFieldError('location', index) && "border-red-500")}
+                        />
                       </div>
-                      {resumeData.experience.map((exp, index) => (
-                        <Card key={index} className="p-4">
-                          <div className="grid grid-cols-2 gap-4">
-                            <Input
-                              placeholder="Job Title"
-                              value={exp.job_title}
-                              onChange={(e) => handleExperienceChange(index, "job_title", e.target.value)}
-                              className={cn(getFieldError('job_title', index) && "border-red-500")}
-                            />
-                            <Input
-                              placeholder="Company"
-                              value={exp.company}
-                              onChange={(e) => handleExperienceChange(index, "company", e.target.value)}
-                              className={cn(getFieldError('company', index) && "border-red-500")}
-                            />
-                            <Input
-                              placeholder="Start Date"
-                              value={exp.start_date}
-                              onChange={(e) => handleExperienceChange(index, "start_date", e.target.value)}
-                              className={cn(getFieldError('start_date', index) && "border-red-500")}
-                            />
-                            <Input
-                              placeholder="End Date"
-                              value={exp.end_date}
-                              onChange={(e) => handleExperienceChange(index, "end_date", e.target.value)}
-                              className={cn(getFieldError('end_date', index) && "border-red-500")}
-                            />
-                            <Input
-                              placeholder="Location"
-                              value={exp.location}
-                              onChange={(e) => handleExperienceChange(index, "location", e.target.value)}
-                              className={cn(getFieldError('location', index) && "border-red-500")}
-                            />
-                          </div>
-                          <div className="mt-4">
-                            <Textarea
-                              placeholder="Job Description"
-                              value={exp.description}
-                              onChange={(e) => handleExperienceChange(index, "description", e.target.value)}
-                              rows={3}
-                              className={cn("w-full", getFieldError('description', index) && "border-red-500")}
-                            />
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-
-                    {/* Education Section */}
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <h3 className="text-lg font-semibold">Education</h3>
-                        <Button variant="outline" onClick={handleAddEducation}>
-                          Add Education
-                        </Button>
+                      <div className="mt-4">
+                        <Textarea
+                          placeholder="Job Description"
+                          value={exp.description}
+                          onChange={(e) => handleExperienceChange(index, "description", e.target.value)}
+                          rows={3}
+                          className={cn("w-full", getFieldError('description', index) && "border-red-500")}
+                        />
                       </div>
-                      {resumeData.education.map((edu, index) => (
-                        <Card key={index} className="p-4">
-                          <div className="grid grid-cols-2 gap-4">
-                            <Input
-                              placeholder="Degree"
-                              value={edu.degree}
-                              onChange={(e) => handleEducationChange(index, "degree", e.target.value)}
-                              className={cn(getFieldError('degree', index) && "border-red-500")}
-                            />
-                            <Input
-                              placeholder="Institution"
-                              value={edu.institution}
-                              onChange={(e) => handleEducationChange(index, "institution", e.target.value)}
-                              className={cn(getFieldError('institution', index) && "border-red-500")}
-                            />
-                            <Input
-                              placeholder="Graduation Date"
-                              value={edu.graduation_date}
-                              onChange={(e) => handleEducationChange(index, "graduation_date", e.target.value)}
-                              className={cn(getFieldError('graduation_date', index) && "border-red-500")}
-                            />
-                            <Input
-                              placeholder="Location"
-                              value={edu.location}
-                              onChange={(e) => handleEducationChange(index, "location", e.target.value)}
-                              className={cn(getFieldError('location', index) && "border-red-500")}
-                            />
-                            <Input
-                              placeholder="GPA (optional)"
-                              value={edu.gpa}
-                              onChange={(e) => handleEducationChange(index, "gpa", e.target.value)}
-                            />
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
+                    </Card>
+                  ))}
+                </div>
 
-                    {/* Skills Section */}
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold">Skills</h3>
-                      <Textarea
-                        id="technical_skills"
-                        placeholder="Technical Skills (e.g., Python, JavaScript, React)"
-                        value={resumeData.technical_skills}
-                        onChange={(e) => setResumeData(prev => ({ ...prev, technical_skills: e.target.value }))}
-                        rows={3}
-                        className={cn(getFieldError('technical_skills') && "border-red-500")}
-                      />
-                      <Textarea
-                        placeholder="Soft Skills (e.g., Leadership, Communication, Teamwork)"
-                        value={resumeData.soft_skills}
-                        onChange={(e) => setResumeData(prev => ({ ...prev, soft_skills: e.target.value }))}
-                        rows={3}
-                      />
-                    </div>
-
-                    {/* Projects Section */}
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <h3 className="text-lg font-semibold">Projects</h3>
-                        <Button variant="outline" onClick={handleAddProject}>
-                          Add Project
-                        </Button>
-                      </div>
-                      {resumeData.projects.map((project, index) => (
-                        <Card key={index} className="p-4">
-                          <div className="space-y-4">
-                            <Input
-                              placeholder="Project Title"
-                              value={project.title}
-                              onChange={(e) => handleProjectChange(index, "title", e.target.value)}
-                            />
-                            <Textarea
-                              placeholder="Project Description"
-                              value={project.description}
-                              onChange={(e) => handleProjectChange(index, "description", e.target.value)}
-                              rows={3}
-                            />
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
+                {/* Education Section */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">Education</h3>
+                    <Button variant="outline" onClick={handleAddEducation}>
+                      Add Education
+                    </Button>
                   </div>
-                </TabsContent>
-              </Tabs>
+                  {resumeData.education.map((edu, index) => (
+                    <Card key={index} className="p-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <Input
+                          placeholder="Degree"
+                          value={edu.degree}
+                          onChange={(e) => handleEducationChange(index, "degree", e.target.value)}
+                          className={cn(getFieldError('degree', index) && "border-red-500")}
+                        />
+                        <Input
+                          placeholder="Institution"
+                          value={edu.institution}
+                          onChange={(e) => handleEducationChange(index, "institution", e.target.value)}
+                          className={cn(getFieldError('institution', index) && "border-red-500")}
+                        />
+                        <Input
+                          placeholder="Graduation Date"
+                          value={edu.graduation_date}
+                          onChange={(e) => handleEducationChange(index, "graduation_date", e.target.value)}
+                          className={cn(getFieldError('graduation_date', index) && "border-red-500")}
+                        />
+                        <Input
+                          placeholder="Location"
+                          value={edu.location}
+                          onChange={(e) => handleEducationChange(index, "location", e.target.value)}
+                          className={cn(getFieldError('location', index) && "border-red-500")}
+                        />
+                        <Input
+                          placeholder="GPA (optional)"
+                          value={edu.gpa}
+                          onChange={(e) => handleEducationChange(index, "gpa", e.target.value)}
+                        />
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+
+                {/* Skills Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Skills</h3>
+                  <Textarea
+                    id="technical_skills"
+                    placeholder="Technical Skills (e.g., Python, JavaScript, React)"
+                    value={resumeData.technical_skills}
+                    onChange={(e) => setResumeData(prev => ({ ...prev, technical_skills: e.target.value }))}
+                    rows={3}
+                    className={cn(getFieldError('technical_skills') && "border-red-500")}
+                  />
+                  <Textarea
+                    placeholder="Soft Skills (e.g., Leadership, Communication, Teamwork)"
+                    value={resumeData.soft_skills}
+                    onChange={(e) => setResumeData(prev => ({ ...prev, soft_skills: e.target.value }))}
+                    rows={3}
+                  />
+                </div>
+
+                {/* Projects Section */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">Projects</h3>
+                    <Button variant="outline" onClick={handleAddProject}>
+                      Add Project
+                    </Button>
+                  </div>
+                  {resumeData.projects.map((project, index) => (
+                    <Card key={index} className="p-4">
+                      <div className="space-y-4">
+                        <Input
+                          placeholder="Project Title"
+                          value={project.title}
+                          onChange={(e) => handleProjectChange(index, "title", e.target.value)}
+                        />
+                        <Textarea
+                          placeholder="Project Description"
+                          value={project.description}
+                          onChange={(e) => handleProjectChange(index, "description", e.target.value)}
+                          rows={3}
+                        />
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
             </CardContent>
           </Card>
 

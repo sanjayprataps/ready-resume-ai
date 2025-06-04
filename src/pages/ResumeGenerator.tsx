@@ -610,383 +610,344 @@ const ResumeGenerator = () => {
 
           <Card className="max-w-4xl mx-auto">
             <CardHeader>
-              <CardTitle>Choose Your Method</CardTitle>
-              <CardDescription>Select how you'd like to generate your resume</CardDescription>
+              <CardTitle className="text-center">Fill your data in the form to generate your resume</CardTitle>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="linkedin" className="w-full">
-                <TabsList className="grid grid-cols-2 mb-8">
-                  <TabsTrigger value="linkedin" className="flex items-center gap-2">
-                    <Link className="h-4 w-4" />
-                    LinkedIn Import
-                  </TabsTrigger>
-                  <TabsTrigger value="guided" className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    Guided Questions
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="linkedin" className="space-y-6">
-                  <div className="space-y-4">
-                    <label className="text-sm font-medium text-gray-700">
-                      LinkedIn Profile URL
-                    </label>
-                    <Input
-                      placeholder="https://www.linkedin.com/in/yourprofile"
-                      value={linkedInUrl}
-                      onChange={(e) => setLinkedInUrl(e.target.value)}
-                    />
-                    <p className="text-xs text-gray-500">
-                      We'll extract your experience, skills, and education from your public LinkedIn profile
-                    </p>
-                  </div>
-                  <Button 
-                    onClick={() => handleGenerate("linkedin")}
-                    disabled={!linkedInUrl || isGenerating}
-                    className="w-full bg-portfolioai-primary hover:bg-portfolioai-secondary"
-                  >
-                    {isGenerating ? "Generating..." : "Import from LinkedIn"}
-                  </Button>
-                </TabsContent>
-
-                <TabsContent value="guided" className="space-y-6">
-                  <div className="space-y-8">
-                    {/* Personal Information Section */}
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold">Personal Information</h3>
-                      <Card className="p-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="full_name">Full Name *</Label>
-                            <Input
-                              id="full_name"
-                              placeholder="John Doe"
-                              value={resumeData.personal_info.full_name}
-                              onChange={(e) => setResumeData(prev => ({
-                                ...prev,
-                                personal_info: { ...prev.personal_info, full_name: e.target.value }
-                              }))}
-                              className={cn(getFieldError('full_name') && "border-red-500")}
-                            />
-                            {getFieldError('full_name') && (
-                              <p className="text-red-500 text-sm">{getFieldError('full_name')?.message}</p>
-                            )}
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="email">Email *</Label>
-                            <Input
-                              id="email"
-                              type="email"
-                              placeholder="john@example.com"
-                              value={resumeData.personal_info.email}
-                              onChange={(e) => setResumeData(prev => ({
-                                ...prev,
-                                personal_info: { ...prev.personal_info, email: e.target.value }
-                              }))}
-                              className={cn(getFieldError('email') && "border-red-500")}
-                            />
-                            {getFieldError('email') && (
-                              <p className="text-red-500 text-sm">{getFieldError('email')?.message}</p>
-                            )}
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="phone">Phone *</Label>
-                            <Input
-                              id="phone"
-                              placeholder="(555) 123-4567"
-                              value={resumeData.personal_info.phone}
-                              onChange={(e) => setResumeData(prev => ({
-                                ...prev,
-                                personal_info: { ...prev.personal_info, phone: e.target.value }
-                              }))}
-                              className={cn(getFieldError('phone') && "border-red-500")}
-                            />
-                            {getFieldError('phone') && (
-                              <p className="text-red-500 text-sm">{getFieldError('phone')?.message}</p>
-                            )}
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="location">Location *</Label>
-                            <Input
-                              id="location"
-                              placeholder="City, State"
-                              value={resumeData.personal_info.location}
-                              onChange={(e) => setResumeData(prev => ({
-                                ...prev,
-                                personal_info: { ...prev.personal_info, location: e.target.value }
-                              }))}
-                              className={cn(getFieldError('location') && "border-red-500")}
-                            />
-                            {getFieldError('location') && (
-                              <p className="text-red-500 text-sm">{getFieldError('location')?.message}</p>
-                            )}
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="linkedin">LinkedIn Profile (Optional)</Label>
-                            <Input
-                              id="linkedin"
-                              placeholder="linkedin.com/in/johndoe"
-                              value={resumeData.personal_info.linkedin}
-                              onChange={(e) => setResumeData(prev => ({
-                                ...prev,
-                                personal_info: { ...prev.personal_info, linkedin: e.target.value }
-                              }))}
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="website">Website/Portfolio (Optional)</Label>
-                            <Input
-                              id="website"
-                              placeholder="www.johndoe.com"
-                              value={resumeData.personal_info.website}
-                              onChange={(e) => setResumeData(prev => ({
-                                ...prev,
-                                personal_info: { ...prev.personal_info, website: e.target.value }
-                              }))}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="mt-4 space-y-2">
-                          <Label htmlFor="summary">Professional Summary *</Label>
-                          <Textarea
-                            id="summary"
-                            placeholder="Write a brief summary of your professional background and career goals..."
-                            value={resumeData.personal_info.summary}
-                            onChange={(e) => setResumeData(prev => ({
-                              ...prev,
-                              personal_info: { ...prev.personal_info, summary: e.target.value }
-                            }))}
-                            rows={4}
-                            className={cn(getFieldError('summary') && "border-red-500")}
-                          />
-                          {getFieldError('summary') && (
-                            <p className="text-red-500 text-sm">{getFieldError('summary')?.message}</p>
-                          )}
-                        </div>
-                      </Card>
-                    </div>
-
-                    {/* Experience Section */}
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <h3 className="text-lg font-semibold">Work Experience</h3>
-                        <Button variant="outline" onClick={handleAddExperience}>
-                          Add Experience
-                        </Button>
-                      </div>
-                      {resumeData.experience.map((exp, index) => (
-                        <Card 
-                          key={index} 
-                          className="p-4"
-                          ref={el => experienceRefs.current[index] = el}
-                        >
-                          <div className="grid grid-cols-2 gap-4">
-                            <Input
-                              placeholder="Job Title"
-                              value={exp.job_title}
-                              onChange={(e) => handleExperienceChange(index, "job_title", e.target.value)}
-                              className={cn(getFieldError('job_title', index) && "border-red-500")}
-                            />
-                            <Input
-                              placeholder="Company"
-                              value={exp.company}
-                              onChange={(e) => handleExperienceChange(index, "company", e.target.value)}
-                              className={cn(getFieldError('company', index) && "border-red-500")}
-                            />
-                            <Input
-                              placeholder="Start Date"
-                              value={exp.start_date}
-                              onChange={(e) => handleExperienceChange(index, "start_date", e.target.value)}
-                              className={cn(getFieldError('start_date', index) && "border-red-500")}
-                            />
-                            <Input
-                              placeholder="End Date"
-                              value={exp.end_date}
-                              onChange={(e) => handleExperienceChange(index, "end_date", e.target.value)}
-                              className={cn(getFieldError('end_date', index) && "border-red-500")}
-                            />
-                            <Input
-                              placeholder="Location"
-                              value={exp.location}
-                              onChange={(e) => handleExperienceChange(index, "location", e.target.value)}
-                              className={cn(getFieldError('location', index) && "border-red-500")}
-                            />
-                          </div>
-                          <div className="mt-4">
-                            <Textarea
-                              placeholder="Job Description"
-                              value={exp.description}
-                              onChange={(e) => handleExperienceChange(index, "description", e.target.value)}
-                              rows={3}
-                              className={cn("w-full", getFieldError('description', index) && "border-red-500")}
-                            />
-                          </div>
-                          {validationErrors.filter(error => error.index === index).map((error, i) => (
-                            <p key={i} className="text-red-500 text-sm mt-1">{error.message}</p>
-                          ))}
-                        </Card>
-                      ))}
-                    </div>
-
-                    {/* Education Section */}
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <h3 className="text-lg font-semibold">Education</h3>
-                        <Button variant="outline" onClick={handleAddEducation}>
-                          Add Education
-                        </Button>
-                      </div>
-                      {resumeData.education.map((edu, index) => (
-                        <Card 
-                          key={index} 
-                          className="p-4"
-                          ref={el => educationRefs.current[index] = el}
-                        >
-                          <div className="grid grid-cols-2 gap-4">
-                            <Input
-                              placeholder="Degree"
-                              value={edu.degree}
-                              onChange={(e) => handleEducationChange(index, "degree", e.target.value)}
-                              className={cn(getFieldError('degree', index) && "border-red-500")}
-                            />
-                            <Input
-                              placeholder="Institution"
-                              value={edu.institution}
-                              onChange={(e) => handleEducationChange(index, "institution", e.target.value)}
-                              className={cn(getFieldError('institution', index) && "border-red-500")}
-                            />
-                            <Input
-                              placeholder="Graduation Date"
-                              value={edu.graduation_date}
-                              onChange={(e) => handleEducationChange(index, "graduation_date", e.target.value)}
-                              className={cn(getFieldError('graduation_date', index) && "border-red-500")}
-                            />
-                            <Input
-                              placeholder="Location"
-                              value={edu.location}
-                              onChange={(e) => handleEducationChange(index, "location", e.target.value)}
-                              className={cn(getFieldError('location', index) && "border-red-500")}
-                            />
-                            <Input
-                              placeholder="GPA (optional)"
-                              value={edu.gpa}
-                              onChange={(e) => handleEducationChange(index, "gpa", e.target.value)}
-                            />
-                          </div>
-                          {validationErrors.filter(error => error.index === index).map((error, i) => (
-                            <p key={i} className="text-red-500 text-sm mt-1">{error.message}</p>
-                          ))}
-                        </Card>
-                      ))}
-                    </div>
-
-                    {/* Skills Section */}
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold">Skills</h3>
-                      <Textarea
-                        id="technical_skills"
-                        placeholder="Technical Skills (e.g., Python, JavaScript, React)"
-                        value={resumeData.technical_skills}
-                        onChange={(e) => setResumeData(prev => ({ ...prev, technical_skills: e.target.value }))}
-                        rows={3}
-                        className={cn(getFieldError('technical_skills') && "border-red-500")}
-                      />
-                      {getFieldError('technical_skills') && (
-                        <p className="text-red-500 text-sm">{getFieldError('technical_skills')?.message}</p>
-                      )}
-                      <Textarea
-                        placeholder="Soft Skills (e.g., Leadership, Communication, Teamwork)"
-                        value={resumeData.soft_skills}
-                        onChange={(e) => setResumeData(prev => ({ ...prev, soft_skills: e.target.value }))}
-                        rows={3}
-                      />
-                    </div>
-
-                    {/* Projects Section */}
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <h3 className="text-lg font-semibold">Projects</h3>
-                        <Button variant="outline" onClick={handleAddProject}>
-                          Add Project
-                        </Button>
-                      </div>
-                      {resumeData.projects.map((project, index) => (
-                        <Card key={index} className="p-4">
-                          <div className="space-y-4">
-                            <Input
-                              placeholder="Project Title"
-                              value={project.title}
-                              onChange={(e) => handleProjectChange(index, "title", e.target.value)}
-                            />
-                            <Textarea
-                              placeholder="Project Description"
-                              value={project.description}
-                              onChange={(e) => handleProjectChange(index, "description", e.target.value)}
-                              rows={3}
-                            />
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-
-                    {/* Generate button */}
-                    <div className="text-center mt-8">
-                      <Button 
-                        onClick={() => handleGenerate("guided")}
-                        disabled={isGenerating}
-                        className="bg-portfolioai-primary hover:bg-portfolioai-secondary px-8 py-3"
-                      >
-                        {isGenerating ? (
-                          <>
-                            <Loader2 className="animate-spin mr-2 h-4 w-4" />
-                            Generating...
-                          </>
-                        ) : (
-                          'Generate Resume'
+              <div className="space-y-6">
+                {/* Personal Information Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Personal Information</h3>
+                  <Card className="p-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="full_name">Full Name *</Label>
+                        <Input
+                          id="full_name"
+                          placeholder="John Doe"
+                          value={resumeData.personal_info.full_name}
+                          onChange={(e) => setResumeData(prev => ({
+                            ...prev,
+                            personal_info: { ...prev.personal_info, full_name: e.target.value }
+                          }))}
+                          className={cn(getFieldError('full_name') && "border-red-500")}
+                        />
+                        {getFieldError('full_name') && (
+                          <p className="text-red-500 text-sm">{getFieldError('full_name')?.message}</p>
                         )}
-                      </Button>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email *</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          placeholder="john@example.com"
+                          value={resumeData.personal_info.email}
+                          onChange={(e) => setResumeData(prev => ({
+                            ...prev,
+                            personal_info: { ...prev.personal_info, email: e.target.value }
+                          }))}
+                          className={cn(getFieldError('email') && "border-red-500")}
+                        />
+                        {getFieldError('email') && (
+                          <p className="text-red-500 text-sm">{getFieldError('email')?.message}</p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="phone">Phone *</Label>
+                        <Input
+                          id="phone"
+                          placeholder="(555) 123-4567"
+                          value={resumeData.personal_info.phone}
+                          onChange={(e) => setResumeData(prev => ({
+                            ...prev,
+                            personal_info: { ...prev.personal_info, phone: e.target.value }
+                          }))}
+                          className={cn(getFieldError('phone') && "border-red-500")}
+                        />
+                        {getFieldError('phone') && (
+                          <p className="text-red-500 text-sm">{getFieldError('phone')?.message}</p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="location">Location *</Label>
+                        <Input
+                          id="location"
+                          placeholder="City, State"
+                          value={resumeData.personal_info.location}
+                          onChange={(e) => setResumeData(prev => ({
+                            ...prev,
+                            personal_info: { ...prev.personal_info, location: e.target.value }
+                          }))}
+                          className={cn(getFieldError('location') && "border-red-500")}
+                        />
+                        {getFieldError('location') && (
+                          <p className="text-red-500 text-sm">{getFieldError('location')?.message}</p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="linkedin">LinkedIn Profile (Optional)</Label>
+                        <Input
+                          id="linkedin"
+                          placeholder="linkedin.com/in/johndoe"
+                          value={resumeData.personal_info.linkedin}
+                          onChange={(e) => setResumeData(prev => ({
+                            ...prev,
+                            personal_info: { ...prev.personal_info, linkedin: e.target.value }
+                          }))}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="website">Website/Portfolio (Optional)</Label>
+                        <Input
+                          id="website"
+                          placeholder="www.johndoe.com"
+                          value={resumeData.personal_info.website}
+                          onChange={(e) => setResumeData(prev => ({
+                            ...prev,
+                            personal_info: { ...prev.personal_info, website: e.target.value }
+                          }))}
+                        />
+                      </div>
                     </div>
 
-                    {/* Resume Preview */}
-                    {generatedResume && (
-                      <Card className="mt-8">
-                        <CardHeader>
-                          <CardTitle>Generated Resume</CardTitle>
-                          <CardDescription>Review your generated resume below</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-6">
-                            {/* PDF Preview */}
-                            {generatedResume.pdfUrl && (
-                              <div className="border rounded-lg overflow-hidden h-[800px]">
-                                <iframe
-                                  src={generatedResume.pdfUrl}
-                                  className="w-full h-full"
-                                  title="Resume Preview"
-                                />
-                              </div>
-                            )}
+                    <div className="mt-4 space-y-2">
+                      <Label htmlFor="summary">Professional Summary *</Label>
+                      <Textarea
+                        id="summary"
+                        placeholder="Write a brief summary of your professional background and career goals..."
+                        value={resumeData.personal_info.summary}
+                        onChange={(e) => setResumeData(prev => ({
+                          ...prev,
+                          personal_info: { ...prev.personal_info, summary: e.target.value }
+                        }))}
+                        rows={4}
+                        className={cn(getFieldError('summary') && "border-red-500")}
+                      />
+                      {getFieldError('summary') && (
+                        <p className="text-red-500 text-sm">{getFieldError('summary')?.message}</p>
+                      )}
+                    </div>
+                  </Card>
+                </div>
 
-                            {/* Download Button */}
-                            <div className="flex justify-center">
-                              <Button onClick={handleDownloadPDF}>
-                                <Download className="mr-2 h-4 w-4" />
-                                Download PDF
-                              </Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )}
+                {/* Experience Section */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">Work Experience</h3>
+                    <Button variant="outline" onClick={handleAddExperience}>
+                      Add Experience
+                    </Button>
                   </div>
-                </TabsContent>
-              </Tabs>
+                  {resumeData.experience.map((exp, index) => (
+                    <Card 
+                      key={index} 
+                      className="p-4"
+                      ref={el => experienceRefs.current[index] = el}
+                    >
+                      <div className="grid grid-cols-2 gap-4">
+                        <Input
+                          placeholder="Job Title"
+                          value={exp.job_title}
+                          onChange={(e) => handleExperienceChange(index, "job_title", e.target.value)}
+                          className={cn(getFieldError('job_title', index) && "border-red-500")}
+                        />
+                        <Input
+                          placeholder="Company"
+                          value={exp.company}
+                          onChange={(e) => handleExperienceChange(index, "company", e.target.value)}
+                          className={cn(getFieldError('company', index) && "border-red-500")}
+                        />
+                        <Input
+                          placeholder="Start Date"
+                          value={exp.start_date}
+                          onChange={(e) => handleExperienceChange(index, "start_date", e.target.value)}
+                          className={cn(getFieldError('start_date', index) && "border-red-500")}
+                        />
+                        <Input
+                          placeholder="End Date"
+                          value={exp.end_date}
+                          onChange={(e) => handleExperienceChange(index, "end_date", e.target.value)}
+                          className={cn(getFieldError('end_date', index) && "border-red-500")}
+                        />
+                        <Input
+                          placeholder="Location"
+                          value={exp.location}
+                          onChange={(e) => handleExperienceChange(index, "location", e.target.value)}
+                          className={cn(getFieldError('location', index) && "border-red-500")}
+                        />
+                      </div>
+                      <div className="mt-4">
+                        <Textarea
+                          placeholder="Job Description"
+                          value={exp.description}
+                          onChange={(e) => handleExperienceChange(index, "description", e.target.value)}
+                          rows={3}
+                          className={cn("w-full", getFieldError('description', index) && "border-red-500")}
+                        />
+                      </div>
+                      {validationErrors.filter(error => error.index === index).map((error, i) => (
+                        <p key={i} className="text-red-500 text-sm mt-1">{error.message}</p>
+                      ))}
+                    </Card>
+                  ))}
+                </div>
+
+                {/* Education Section */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">Education</h3>
+                    <Button variant="outline" onClick={handleAddEducation}>
+                      Add Education
+                    </Button>
+                  </div>
+                  {resumeData.education.map((edu, index) => (
+                    <Card 
+                      key={index} 
+                      className="p-4"
+                      ref={el => educationRefs.current[index] = el}
+                    >
+                      <div className="grid grid-cols-2 gap-4">
+                        <Input
+                          placeholder="Degree"
+                          value={edu.degree}
+                          onChange={(e) => handleEducationChange(index, "degree", e.target.value)}
+                          className={cn(getFieldError('degree', index) && "border-red-500")}
+                        />
+                        <Input
+                          placeholder="Institution"
+                          value={edu.institution}
+                          onChange={(e) => handleEducationChange(index, "institution", e.target.value)}
+                          className={cn(getFieldError('institution', index) && "border-red-500")}
+                        />
+                        <Input
+                          placeholder="Graduation Date"
+                          value={edu.graduation_date}
+                          onChange={(e) => handleEducationChange(index, "graduation_date", e.target.value)}
+                          className={cn(getFieldError('graduation_date', index) && "border-red-500")}
+                        />
+                        <Input
+                          placeholder="Location"
+                          value={edu.location}
+                          onChange={(e) => handleEducationChange(index, "location", e.target.value)}
+                          className={cn(getFieldError('location', index) && "border-red-500")}
+                        />
+                        <Input
+                          placeholder="GPA (optional)"
+                          value={edu.gpa}
+                          onChange={(e) => handleEducationChange(index, "gpa", e.target.value)}
+                        />
+                      </div>
+                      {validationErrors.filter(error => error.index === index).map((error, i) => (
+                        <p key={i} className="text-red-500 text-sm mt-1">{error.message}</p>
+                      ))}
+                    </Card>
+                  ))}
+                </div>
+
+                {/* Skills Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Skills</h3>
+                  <Textarea
+                    id="technical_skills"
+                    placeholder="Technical Skills (e.g., Python, JavaScript, React)"
+                    value={resumeData.technical_skills}
+                    onChange={(e) => setResumeData(prev => ({ ...prev, technical_skills: e.target.value }))}
+                    rows={3}
+                    className={cn(getFieldError('technical_skills') && "border-red-500")}
+                  />
+                  {getFieldError('technical_skills') && (
+                    <p className="text-red-500 text-sm">{getFieldError('technical_skills')?.message}</p>
+                  )}
+                  <Textarea
+                    placeholder="Soft Skills (e.g., Leadership, Communication, Teamwork)"
+                    value={resumeData.soft_skills}
+                    onChange={(e) => setResumeData(prev => ({ ...prev, soft_skills: e.target.value }))}
+                    rows={3}
+                  />
+                </div>
+
+                {/* Projects Section */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">Projects</h3>
+                    <Button variant="outline" onClick={handleAddProject}>
+                      Add Project
+                    </Button>
+                  </div>
+                  {resumeData.projects.map((project, index) => (
+                    <Card key={index} className="p-4">
+                      <div className="space-y-4">
+                        <Input
+                          placeholder="Project Title"
+                          value={project.title}
+                          onChange={(e) => handleProjectChange(index, "title", e.target.value)}
+                        />
+                        <Textarea
+                          placeholder="Project Description"
+                          value={project.description}
+                          onChange={(e) => handleProjectChange(index, "description", e.target.value)}
+                          rows={3}
+                        />
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+
+                {/* Generate button */}
+                <div className="text-center mt-8">
+                  <Button 
+                    onClick={() => handleGenerate("guided")}
+                    disabled={isGenerating}
+                    className="bg-portfolioai-primary hover:bg-portfolioai-secondary px-8 py-3"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="animate-spin mr-2 h-4 w-4" />
+                        Generating...
+                      </>
+                    ) : (
+                      'Generate Resume'
+                    )}
+                  </Button>
+                </div>
+
+                {/* Resume Preview */}
+                {generatedResume && (
+                  <Card className="mt-8">
+                    <CardHeader>
+                      <CardTitle>Generated Resume</CardTitle>
+                      <CardDescription>Review your generated resume below</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-6">
+                        {/* PDF Preview */}
+                        {generatedResume.pdfUrl && (
+                          <div className="border rounded-lg overflow-hidden h-[800px]">
+                            <iframe
+                              src={generatedResume.pdfUrl}
+                              className="w-full h-full"
+                              title="Resume Preview"
+                            />
+                          </div>
+                        )}
+
+                        {/* Download Button */}
+                        <div className="flex justify-center">
+                          <Button onClick={handleDownloadPDF}>
+                            <Download className="mr-2 h-4 w-4" />
+                            Download PDF
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </CardContent>
           </Card>
         </div>
