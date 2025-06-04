@@ -53,7 +53,7 @@ const App = () => (
         <Sonner />
         <Router>
           <Routes>
-            <Route index element={<Index />} />
+            <Route index element={<MainLayout><Index /></MainLayout>} />
             <Route path="resume-generator" element={<ResumeGenerator />} />
             <Route path="resume-optimizer" element={<ResumeOptimizer />} />
             <Route path="cover-letter-writer" element={<CoverLetterWriter />} />

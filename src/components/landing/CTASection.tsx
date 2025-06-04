@@ -10,7 +10,7 @@ const CTASection = () => {
     secondary_cta,
     note
   } = getCTAData();
-  return <section className="py-20 bg-portfolioai-primary">
+  return <section className="py-12 bg-portfolioai-primary">
       <div className="container-wide">
         <div className="text-center max-w-3xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-bold text-white">

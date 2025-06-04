@@ -16,11 +16,7 @@ const Navbar = () => {
           </Link>
         </div>
         
-        <div className="flex-1 flex justify-end">
-          <Button variant="ghost" asChild>
-            <Link to="/login">Login</Link>
-          </Button>
-        </div>
+        <div className="flex-1"></div>
       </div>
     </nav>;
 };
