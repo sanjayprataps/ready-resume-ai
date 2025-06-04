@@ -137,11 +137,10 @@ const JobSearch = () => {
             <p className="text-sm text-gray-500">{job.location}</p>
           </div>
           <div className="text-right">
-            <div className="inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-              {job.match_score}% Match
-            </div>
             {job.salary && (
-              <p className="text-sm text-gray-600 mt-1">{job.salary}</p>
+              <div className="inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                {job.salary}
+              </div>
             )}
           </div>
         </div>
