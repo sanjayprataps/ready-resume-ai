@@ -43,6 +43,7 @@ const InterviewCoach = () => {
   const [interviewAnalysis, setInterviewAnalysis] = useState<InterviewAnalysis | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const feedbackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     return () => {
@@ -53,6 +54,12 @@ const InterviewCoach = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    if (interviewAnalysis && feedbackRef.current) {
+      feedbackRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [interviewAnalysis]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -202,7 +209,7 @@ const InterviewCoach = () => {
             </Button>
           </div>
 
-          {isInterviewActive && (
+          {(isInterviewActive || messages.length > 0) && (
             <Card className="mt-8">
               <CardHeader><CardTitle>Mock Interview</CardTitle></CardHeader>
               <CardContent>
@@ -217,8 +224,19 @@ const InterviewCoach = () => {
                   </div>
                 </ScrollArea>
                 <form onSubmit={handleSubmitAnswer} className="flex gap-2">
-                  <Textarea value={userAnswer} onChange={(e) => setUserAnswer(e.target.value)} rows={3} placeholder="Type your answer here..." className="flex-1" />
-                  <Button type="submit" disabled={isProcessing || !userAnswer.trim()}>
+                  <Textarea 
+                    value={userAnswer} 
+                    onChange={(e) => setUserAnswer(e.target.value)} 
+                    rows={3} 
+                    placeholder={isInterviewActive ? "Type your answer here..." : "Interview completed"} 
+                    className="flex-1"
+                    disabled={!isInterviewActive}
+                  />
+                  <Button 
+                    type="submit" 
+                    disabled={isProcessing || !userAnswer.trim() || !isInterviewActive}
+                    className={!isInterviewActive ? "opacity-50 cursor-not-allowed" : ""}
+                  >
                     {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                   </Button>
                 </form>
@@ -227,7 +245,7 @@ const InterviewCoach = () => {
           )}
 
           {interviewAnalysis && (
-            <div className="mt-10">
+            <div ref={feedbackRef} className="mt-10">
               <Card className="mt-6">
                 <CardHeader><CardTitle>Interview Feedback</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
