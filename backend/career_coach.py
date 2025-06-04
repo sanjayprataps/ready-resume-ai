@@ -149,10 +149,29 @@ async def analyze_career(resume_text: str) -> Dict:
                 try:
                     analysis = json.loads(response_text)
                     logger.info("Successfully parsed analysis response")
-                    return {
-                        "status": "success",
-                        "analysis": analysis
-                    }
+                    
+                    # Generate PDF report
+                    try:
+                        pdf_base64 = generate_pdf(analysis)
+                        if pdf_base64:
+                            return {
+                                "status": "success",
+                                "analysis": analysis,
+                                "pdf": pdf_base64
+                            }
+                        else:
+                            logger.warning("PDF generation failed, returning analysis without PDF")
+                            return {
+                                "status": "success",
+                                "analysis": analysis
+                            }
+                    except Exception as pdf_error:
+                        logger.error(f"Error generating PDF: {str(pdf_error)}")
+                        return {
+                            "status": "success",
+                            "analysis": analysis
+                        }
+                        
                 except json.JSONDecodeError as e:
                     logger.error(f"JSON parsing error: {str(e)}")
                     logger.error(f"Raw response: {response_text}")
@@ -200,12 +219,87 @@ def generate_pdf(analysis_data: Dict) -> str:
         str: The base64-encoded PDF content
     """
     try:
-        print("\n=== Generating HTML Report ===")
-        template = env.get_template('career_analysis_template.html')
-        html_report = template.render(analysis=analysis_data)
-        print("HTML report generated successfully")
+        logger.info("\n=== Generating HTML Report ===")
         
-        print("\n=== Converting to PDF ===")
+        # Create a simple HTML template for the report
+        html_template = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Career Analysis Report</title>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; margin: 40px; }
+                h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+                h2 { color: #34495e; margin-top: 30px; }
+                .section { margin-bottom: 30px; }
+                ul { list-style-type: none; padding-left: 0; }
+                li { margin-bottom: 10px; padding-left: 20px; position: relative; }
+                li:before { content: "•"; position: absolute; left: 0; color: #3498db; }
+            </style>
+        </head>
+        <body>
+            <h1>Career Analysis Report</h1>
+            
+            <div class="section">
+                <h2>Career Summary</h2>
+                <p>{{ analysis.career_summary }}</p>
+            </div>
+            
+            <div class="section">
+                <h2>Key Strengths</h2>
+                <ul>
+                    {% for strength in analysis.key_strengths %}
+                    <li>{{ strength }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <div class="section">
+                <h2>Areas for Growth</h2>
+                <ul>
+                    {% for area in analysis.areas_for_growth %}
+                    <li>{{ area }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <div class="section">
+                <h2>Career Paths</h2>
+                <ul>
+                    {% for path in analysis.career_paths %}
+                    <li>{{ path }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <div class="section">
+                <h2>Skill Development</h2>
+                <ul>
+                    {% for skill in analysis.skill_development %}
+                    <li>{{ skill }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <div class="section">
+                <h2>Industry Opportunities</h2>
+                <ul>
+                    {% for opportunity in analysis.industry_opportunities %}
+                    <li>{{ opportunity }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </body>
+        </html>
+        """
+        
+        # Render the template with the analysis data
+        template = env.from_string(html_template)
+        html_report = template.render(analysis=analysis_data)
+        logger.info("HTML report generated successfully")
+        
+        logger.info("\n=== Converting to PDF ===")
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_pdf_path = os.path.join(temp_dir, 'career_analysis.pdf')
             
@@ -222,29 +316,27 @@ def generate_pdf(analysis_data: Dict) -> str:
             }
             
             try:
-                print("Attempting PDF conversion...")
+                logger.info("Attempting PDF conversion...")
                 pdfkit.from_string(html_report, temp_pdf_path, options=options)
-                print("PDF conversion successful")
+                logger.info("PDF conversion successful")
                 
                 # Read the generated PDF and encode it as base64
                 with open(temp_pdf_path, 'rb') as pdf_file:
                     pdf_content = pdf_file.read()
                     pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
-                print("PDF encoded successfully")
+                logger.info("PDF encoded successfully")
                 
                 return pdf_base64
             except Exception as pdf_error:
-                print(f"\n=== PDF Generation Error ===")
-                print(f"Error: {str(pdf_error)}")
-                print("Stack trace:", traceback.format_exc())
-                # Return analysis without PDF if PDF generation fails
+                logger.error(f"\n=== PDF Generation Error ===")
+                logger.error(f"Error: {str(pdf_error)}")
+                logger.error("Stack trace:", traceback.format_exc())
                 return None
         
     except Exception as html_error:
-        print(f"\n=== HTML Generation Error ===")
-        print(f"Error: {str(html_error)}")
-        print("Stack trace:", traceback.format_exc())
-        # Return analysis without HTML/PDF if HTML generation fails
+        logger.error(f"\n=== HTML Generation Error ===")
+        logger.error(f"Error: {str(html_error)}")
+        logger.error("Stack trace:", traceback.format_exc())
         return None
 
 def generate_report(analysis_data: Dict) -> Dict:

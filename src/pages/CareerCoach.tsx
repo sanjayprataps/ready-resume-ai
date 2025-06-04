@@ -132,12 +132,14 @@ const CareerCoach = () => {
             setPdfUrl(url);
             console.log("PDF URL created:", url);
           } catch (pdfError) {
-            console.warn("Error creating PDF preview:", pdfError);
+            console.error("Error creating PDF preview:", pdfError);
             setPdfUrl(null);
+            toast.error("Failed to generate PDF report");
           }
         } else {
           console.warn("No PDF data received in response");
           setPdfUrl(null);
+          toast.warning("PDF report generation failed");
         }
         
         toast.success("Career analysis completed successfully!");
